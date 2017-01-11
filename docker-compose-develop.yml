@@ -1,0 +1,15 @@
+develop:
+  extends:
+    file: base.yml
+    service: base
+  ports:
+    - "35732:35729"
+  container_name: adapter-earth-engine-develop
+  environment:
+    DEBUG: "True"
+    CT_URL: http://mymachine:9000
+    LOCAL_URL: http://mymachine:5700
+  command: develop
+  volumes:
+    - ./adapterearthengine:/opt/adapter-earth-engine/adapterearthengine
+  restart: always
