@@ -1,4 +1,8 @@
 Flask==0.12.0
 pycrypto==2.6.1
 earthengine-api==0.1.102
-CTRegisterMicroserviceFlask==0.1.1
+sql2gee==0.0.1
+CTRegisterMicroserviceFlask==0.1.3
+requests==2.12.4
+hyp==0.6.0
+marshmallow==2.11.1

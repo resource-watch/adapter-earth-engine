@@ -1,0 +1,118 @@
+{
+	"name": "#(service.name)",
+	"endpoints": [{
+		"path": "/query/:dataset",
+		"method": "GET",
+		"binary": true,
+		"redirect": {
+			"method": "POST",
+			"path": "/api/v1/earthengine/query/:dataset"
+		},
+		"filters": [{
+			"name": "dataset",
+			"path": "/dataset/:dataset",
+			"method": "GET",
+			"params": {
+				"dataset": "dataset"
+			},
+			"compare": {
+				"data": {
+					"attributes": {
+						"provider": "earthengine"
+					}
+				}
+			}
+		}]
+	}, {
+		"path": "/query/:dataset",
+		"method": "POST",
+		"binary": true,
+		"redirect": {
+			"method": "POST",
+			"path": "/api/v1/earthengine/query/:dataset"
+		},
+		"filters": [{
+			"name": "dataset",
+			"path": "/dataset/:dataset",
+			"method": "GET",
+			"params": {
+				"dataset": "dataset"
+			},
+			"compare": {
+				"data": {
+					"attributes": {
+						"provider": "earthengine"
+					}
+				}
+			}
+		}]
+	},{
+		"path": "/download/:dataset",
+		"method": "GET",
+		"binary": true,
+		"redirect": {
+			"method": "POST",
+			"path": "/api/v1/earthengine/download/:dataset"
+		},
+		"filters": [{
+			"name": "dataset",
+			"path": "/dataset/:dataset",
+			"method": "GET",
+			"params": {
+				"dataset": "dataset"
+			},
+			"compare": {
+				"data": {
+					"attributes": {
+						"provider": "earthengine"
+					}
+				}
+			}
+		}]
+	}, {
+		"path": "/download/:dataset",
+		"method": "POST",
+		"binary": true,
+		"redirect": {
+			"method": "POST",
+			"path": "/api/v1/earthengine/download/:dataset"
+		},
+		"filters": [{
+			"name": "dataset",
+			"path": "/dataset/:dataset",
+			"method": "GET",
+			"params": {
+				"dataset": "dataset"
+			},
+			"compare": {
+				"data": {
+					"attributes": {
+						"provider": "earthengine"
+					}
+				}
+			}
+		}]
+	}, {
+		"path": "/fields/:dataset",
+		"method": "GET",
+		"redirect": {
+			"method": "POST",
+			"path": "/api/v1/earthengine/fields/:dataset"
+		},
+		"filters": [{
+			"name": "dataset",
+			"path": "/dataset/:dataset",
+			"method": "GET",
+			"params": {
+				"dataset": "dataset"
+			},
+			"compare": {
+				"data": {
+					"attributes": {
+						"provider": "earthengine"
+					}
+				}
+			}
+		}]
+	}]
+}

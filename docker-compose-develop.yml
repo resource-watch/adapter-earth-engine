@@ -9,6 +9,7 @@ develop:
     DEBUG: "True"
     CT_URL: http://mymachine:9000
     LOCAL_URL: http://mymachine:5700
+    EE_PRIVATE_KEY: ${EE_PRIVATE_KEY}
   command: develop
   volumes:
     - ./adapterearthengine:/opt/adapter-earth-engine/adapterearthengine
