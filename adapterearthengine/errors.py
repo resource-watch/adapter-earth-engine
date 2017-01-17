@@ -7,5 +7,19 @@ class Error(Exception):
         self.message = message
 
 
-class NotFoundError(Error):
-    pass
+class SqlFormatError(Error):
+
+    def __init__(self, message):
+        Error.__init__(self,
+         name='SqlFormatError',
+         message=message
+     )
+
+
+class GEEQueryError(Error):
+
+    def __init__(self, message):
+        Error.__init__(self,
+         name='GEEQueryError',
+         message=message
+     )

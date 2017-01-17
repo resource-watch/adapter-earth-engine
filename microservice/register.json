@@ -39,5 +39,12 @@
 			"method": "POST",
 			"path": "/api/v1/earthengine/fields/:dataset"
 		}
+	},{
+		"path": "/rest-datasets/gee",
+		"method": "POST",
+		"redirect": {
+			"method": "POST",
+			"path": "/api/v1/earthengine/rest-datasets/gee"
+		}
 	}]
 }
