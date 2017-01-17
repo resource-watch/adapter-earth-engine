@@ -8,16 +8,9 @@ def query(query):
     logging.info('Executing Query: '+query)
 
     try:
-        response = SQL2GEE(query).execute()
+        q = SQL2GEE(query)
+        response = q.execute()
     except Exception as error:
         raise GEEQueryError(error)
 
     return response
-
-
-def fields():
-    pass
-
-
-def download():
-    pass

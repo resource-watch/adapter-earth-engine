@@ -1,5 +1,5 @@
 from hyp.marshmallow import Responder
-from adapterearthengine.schemas import ErrorSchema, DatasetSchema
+from adapterearthengine.schemas import ErrorSchema, DatasetSchema, QuerySchema, FieldsSchema
 
 
 class ErrorResponder(Responder):
@@ -18,10 +18,10 @@ class DatasetResponder(Responder):
 
 
 class QueryResponder(Responder):
-    TYPE = 'attributes'
-    SERIALIZER = DatasetSchema
+    TYPE = 'data'
+    SERIALIZER = QuerySchema
 
-    def deserialize(self, query):
-        query = query.get('data', {})
-        query = self.SERIALIZER(only=[self.TYPE]).dump(query)
-        return query.data.get(self.TYPE)
+
+class FieldsResponder(Responder):
+    TYPE = 'data'
+    SERIALIZER = FieldsSchema

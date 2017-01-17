@@ -11,9 +11,9 @@ def convert(query, type='sql'):
     if not query:
         raise SqlFormatError(message='sql or fs not provided')
 
-    query_type = 'sql2sql?sql='+query
-    if type is 'fs':
-        query_type = 'fs2sql' # @TODO
+    query_type = 'sql2SQL?sql='+query
+    if type == 'fs':
+        query_type = 'fs2SQL' # @TODO
 
     try:
         config = {
