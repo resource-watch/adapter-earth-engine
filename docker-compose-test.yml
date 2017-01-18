@@ -1,0 +1,8 @@
+develop:
+  extends:
+    file: base.yml
+    service: base
+  container_name: adapter-earth-engine-test
+  environment:
+    DEBUG: "True"
+  command: test

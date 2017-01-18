@@ -18,7 +18,7 @@
 			"compare": {
 				"data": {
 					"attributes": {
-						"provider": "gee"
+						"provider": "earthengine"
 					}
 				}
 			}
@@ -41,7 +41,7 @@
 			"compare": {
 				"data": {
 					"attributes": {
-						"provider": "gee"
+						"provider": "earthengine"
 					}
 				}
 			}
@@ -64,7 +64,7 @@
 			"compare": {
 				"data": {
 					"attributes": {
-						"provider": "gee"
+						"provider": "earthengine"
 					}
 				}
 			}
@@ -87,7 +87,7 @@
 			"compare": {
 				"data": {
 					"attributes": {
-						"provider": "gee"
+						"provider": "earthengine"
 					}
 				}
 			}
@@ -109,17 +109,10 @@
 			"compare": {
 				"data": {
 					"attributes": {
-						"provider": "gee"
+						"provider": "earthengine"
 					}
 				}
 			}
 		}]
-	},{
-		"path": "/rest-datasets/gee",
-		"method": "POST",
-		"redirect": {
-			"method": "POST",
-			"path": "/api/v1/earthengine/rest-datasets/gee"
-		}
 	}]
 }

@@ -1,9 +1,14 @@
+import os
 import json
 import logging
+import ee
+from oauth2client.service_account import ServiceAccountCredentials
 
 from flask import Flask
-from adapterearthengine.routes.api.v1 import endpoints
 from adapterearthengine.config import settings
+from adapterearthengine.routes.api.v1 import endpoints
+from adapterearthengine.utils.files import load_config_json
+import CTRegisterMicroserviceFlask
 
 # Logging
 logging.basicConfig(
@@ -12,14 +17,37 @@ logging.basicConfig(
     datefmt = '%Y%m%d-%H:%M%p',
 )
 
+# Initializing GEE
+gee = settings.get('gee')
+gee_credentials = ServiceAccountCredentials.from_p12_keyfile(
+    gee.get('service_account'),
+    gee.get('privatekey_file'),
+    scopes = ee.oauth.SCOPE
+ )
+
+ee.Initialize(gee_credentials)
+
 def create_application():
-
     # Flask
-    app = Flask(__name__)
+    application = Flask(__name__)
 
-    app.config.from_object(settings)
-    
+    # Config
+    application.config.from_object(settings)
+
     # Routing
-    app.register_blueprint(endpoints, url_prefix='/api/v1')
+    application.register_blueprint(endpoints, url_prefix='/api/v1/earthengine')
 
-    return app
+    # CT
+    info = load_config_json('register')
+    swagger = load_config_json('swagger')
+    CTRegisterMicroserviceFlask.register(
+        app = application,
+        name = 'adapter-earth-engine',
+        info = info,
+        swagger = swagger,
+        mode = CTRegisterMicroserviceFlask.AUTOREGISTER_MODE if os.getenv('ENVIRONMENT') == 'dev' else CTRegisterMicroserviceFlask.NORMAL_MODE,
+        ct_url = os.getenv('CT_URL'),
+        url = os.getenv('LOCAL_URL')
+    )
+
+    return application
