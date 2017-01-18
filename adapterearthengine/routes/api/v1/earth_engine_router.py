@@ -155,7 +155,7 @@ def download(dataset_id):
                 'Content-type': 'application/json'
             }
         )
-        
+
 
 
 @endpoints.route('/rest-datasets/gee', methods=['POST'])
@@ -163,11 +163,8 @@ def register_dataset():
     """Register GEE Dataset Endpoint"""
     logging.info('Registering new GEE Dataset')
 
-    # Get and deserialize
-    dataset = DatasetResponder().deserialize(request.get_json(), from_filter=False)
-
     # Build query
-    table_name = dataset.get('attributes').get('tableName')
+    table_name = request.get_json().get('connector').get('table_name')
     sql = 'SELECT * FROM ' + table_name + ' LIMIT 1'
 
     # Convert query
@@ -181,7 +178,7 @@ def register_dataset():
         return jsonify(response), 500
 
     config = {
-        'uri': '/dataset/'+request.get_json().get('data', {}).get('id'),
+        'uri': '/dataset/'+request.get_json().get('connector').get('id'),
         'method': 'PATCH',
         'body': {'status': 1}
     }
