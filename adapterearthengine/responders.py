@@ -48,3 +48,11 @@ class QueryResponder(Responder):
 class FieldsResponder(Responder):
     TYPE = 'data'
     SERIALIZER = FieldsSchema
+
+    def serialize(self, fields):
+        result = {}
+        for key, value in fields.iteritems():
+            result[key] = {}
+            result[key]['type'] = value
+
+        return result

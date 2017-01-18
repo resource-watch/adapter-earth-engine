@@ -49,6 +49,10 @@ def query(dataset_id):
         response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
         return jsonify(response), 500
 
+    if type(response) is int or type(response) is float:
+        response = QueryResponder.build({'result': float(response)})
+        return jsonify(response), 200
+
     response = QueryResponder().serialize(response.get('features', {}))
     response = QueryResponder.build({'attributes': response})
     return jsonify(response), 200
@@ -76,7 +80,8 @@ def fields(dataset_id):
         response = ErrorResponder.build({'status': 500, 'message': error.message})
         return jsonify(response), 500
 
-    response = FieldsResponder.build({'id': response.get('id', None), 'fields': response.get('columns', {})})
+    fields = FieldsResponder().serialize(response.get('columns', {}))
+    response = FieldsResponder.build({'table_id': response.get('id', None), 'fields': fields})
     return jsonify(response), 200
 
 
@@ -116,7 +121,11 @@ def download(dataset_id):
         response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
         return jsonify(response), 500
 
-    features = QueryResponder().serialize(response.get('features', {}))
+    if type(response) is int or type(response) is float:
+        features = [float(response)]
+    else:
+        features = QueryResponder().serialize(response.get('features', {}))
+
     f_len = len(features)
 
     def generate_csv():
