@@ -7,7 +7,22 @@
 		"redirect": {
 			"method": "POST",
 			"path": "/api/v1/earthengine/query/:dataset"
-		}
+		},
+		"filters": [{
+			"name": "dataset",
+			"path": "/dataset/:dataset",
+			"method": "GET",
+			"params": {
+				"dataset": "dataset"
+			},
+			"compare": {
+				"data": {
+					"attributes": {
+						"provider": "gee"
+					}
+				}
+			}
+		}]
 	}, {
 		"path": "/query/:dataset",
 		"method": "POST",
@@ -15,7 +30,22 @@
 		"redirect": {
 			"method": "POST",
 			"path": "/api/v1/earthengine/query/:dataset"
-		}
+		},
+		"filters": [{
+			"name": "dataset",
+			"path": "/dataset/:dataset",
+			"method": "GET",
+			"params": {
+				"dataset": "dataset"
+			},
+			"compare": {
+				"data": {
+					"attributes": {
+						"provider": "gee"
+					}
+				}
+			}
+		}]
 	},{
 		"path": "/download/:dataset",
 		"method": "GET",
@@ -23,7 +53,22 @@
 		"redirect": {
 			"method": "POST",
 			"path": "/api/v1/earthengine/download/:dataset"
-		}
+		},
+		"filters": [{
+			"name": "dataset",
+			"path": "/dataset/:dataset",
+			"method": "GET",
+			"params": {
+				"dataset": "dataset"
+			},
+			"compare": {
+				"data": {
+					"attributes": {
+						"provider": "gee"
+					}
+				}
+			}
+		}]
 	}, {
 		"path": "/download/:dataset",
 		"method": "POST",
@@ -31,14 +76,44 @@
 		"redirect": {
 			"method": "POST",
 			"path": "/api/v1/earthengine/download/:dataset"
-		}
+		},
+		"filters": [{
+			"name": "dataset",
+			"path": "/dataset/:dataset",
+			"method": "GET",
+			"params": {
+				"dataset": "dataset"
+			},
+			"compare": {
+				"data": {
+					"attributes": {
+						"provider": "gee"
+					}
+				}
+			}
+		}]
 	}, {
 		"path": "/fields/:dataset",
 		"method": "GET",
 		"redirect": {
 			"method": "POST",
 			"path": "/api/v1/earthengine/fields/:dataset"
-		}
+		},
+		"filters": [{
+			"name": "dataset",
+			"path": "/dataset/:dataset",
+			"method": "GET",
+			"params": {
+				"dataset": "dataset"
+			},
+			"compare": {
+				"data": {
+					"attributes": {
+						"provider": "gee"
+					}
+				}
+			}
+		}]
 	},{
 		"path": "/rest-datasets/gee",
 		"method": "POST",

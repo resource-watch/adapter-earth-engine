@@ -32,44 +32,42 @@ def query(dataset_id):
 
     # Query format and query to GEE
     try:
-        # @TODO provisional
-        #if fs:
-        #    query = QueryService.convert(fs, type='fs')
-        #else:
-        #    query = QueryService.convert(sql, type='sql')
-        query = sql
+        if fs:
+            query = QueryService.convert(fs, type='fs')
+        else:
+            query = QueryService.convert(sql, type='sql')
         response = EarthEngineService.query(query)
     except SqlFormatError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 400, 'message': error.message})
-        return jsonify(response), 500
+        return jsonify(response), 400
     except GEEQueryError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 500, 'message': error.message})
         return jsonify(response), 500
-    except:
+    except Exception as error:
         response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
         return jsonify(response), 500
 
-    response = QueryResponder.build({'attributes': response.get('features', {})})
+    response = QueryResponder().serialize(response.get('features', {}))
+    response = QueryResponder.build({'attributes': response})
     return jsonify(response), 200
 
 
 @endpoints.route('/fields/<dataset_id>', methods=['POST'])
 def fields(dataset_id):
     """Get GEE Dataset Fields Endpoint"""
-    logging.info('Registering new GEE Dataset')
+    logging.info('Getting fields of a GEE Dataset')
 
     # Get and deserialize
     dataset = DatasetResponder().deserialize(request.get_json())
 
     # Build query
-    table_name = dataset.get('tableName')
-    sql = 'SELECT * FROM \"' + table_name + '\" LIMIT 1'
+    table_name = dataset.get('attributes').get('tableName')
+    sql = 'SELECT * FROM ' + table_name + ' LIMIT 1'
 
-    # Get data
-    #query = QueryService.convert(sql, type='sql') # @TODO
-    query = sql
+    # Convert query
+    query = QueryService.convert(sql, type='sql')
 
     try:
         response = EarthEngineService.query(query)
@@ -101,12 +99,10 @@ def download(dataset_id):
 
     # Query format and query to GEE
     try:
-        # @TODO provisional
-        #if fs:
-        #    query = QueryService.convert(fs, type='fs')
-        #else:
-        #    query = QueryService.convert(sql, type='sql')
-        query = sql
+        if fs:
+           query = QueryService.convert(fs, type='fs')
+        else:
+           query = QueryService.convert(sql, type='sql')
         response = EarthEngineService.query(query)
     except SqlFormatError as error:
         logging.error(error.message)
@@ -120,7 +116,7 @@ def download(dataset_id):
         response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
         return jsonify(response), 500
 
-    features = response.get('features', {})
+    features = QueryResponder().serialize(response.get('features', {}))
     f_len = len(features)
 
     def generate_csv():
@@ -168,15 +164,14 @@ def register_dataset():
     logging.info('Registering new GEE Dataset')
 
     # Get and deserialize
-    dataset = DatasetResponder().deserialize(request.get_json())
+    dataset = DatasetResponder().deserialize(request.get_json(), from_filter=False)
 
     # Build query
-    table_name = dataset.get('tableName')
-    sql = 'SELECT * FROM \"' + table_name + '\" LIMIT 1'
+    table_name = dataset.get('attributes').get('tableName')
+    sql = 'SELECT * FROM ' + table_name + ' LIMIT 1'
 
-    # Get data
-    #query = QueryService.convert(sql, type='sql') # @TODO
-    query = sql
+    # Convert query
+    query = QueryService.convert(sql, type='sql')
 
     try:
         response = EarthEngineService.query(query)
@@ -185,12 +180,10 @@ def register_dataset():
         response = ErrorResponder.build({'status': 500, 'message': error.message})
         return jsonify(response), 500
 
-    # @TODO
-    # config = {
-    #     'uri': '/dataset/'+request.get_json().get('dataset', {}).get('data').get('id'),
-    #     'method': 'PATCH',
-    #     'body': {'status': 'saved'}
-    # }
-    # response = request_to_microservice(config)
-    response = QueryResponder.build({'attributes': response.get('features', {})})
+    config = {
+        'uri': '/dataset/'+request.get_json().get('data', {}).get('id'),
+        'method': 'PATCH',
+        'body': {'status': 1}
+    }
+    response = request_to_microservice(config)
     return jsonify(response), 200

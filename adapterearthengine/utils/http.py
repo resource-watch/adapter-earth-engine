@@ -1,8 +1,10 @@
 import os
+import json
 from requests import Request, Session
 
 
 CT_URL = os.getenv('CT_URL')
+CT_TOKEN = os.getenv('CT_TOKEN')
 
 
 def request_to_microservice(config):
@@ -12,13 +14,13 @@ def request_to_microservice(config):
                 method=config.get('method'),
                 url=CT_URL + config.get('uri'),
                 headers={
-                    'content-type': 'application/json'
-                }
+                    'content-type': 'application/json',
+                    'Authorization': 'Bearer '+CT_TOKEN
+                },
+                data=json.dumps(config.get('body'))
             )
         prepped = session.prepare_request(request)
-        if config.get('body'):
-            prepped.body = config.get('body')
-
+    
         response = session.send(prepped)
     except Exception as error:
        raise error

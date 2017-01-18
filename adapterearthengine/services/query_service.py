@@ -1,4 +1,5 @@
 import logging
+import re
 
 from adapterearthengine.responders import QueryResponder
 from adapterearthengine.utils.http import request_to_microservice
@@ -29,4 +30,12 @@ def convert(query, type='sql'):
         raise SqlFormatError(message=errors[0].get('detail'))
 
     query = QueryResponder().deserialize(response)
-    return query.get('query')
+    query = query.get('attributes', {}).get('query')
+    return quote_table(query, type)
+
+
+def quote_table(query, type='sql'):
+    regex = re.compile(r'from ([a-zA-Z0-9_:-]*)', re.IGNORECASE)
+    table = regex.search(query).group(1)
+    query = query.replace(table, '\"'+table+'\"')
+    return query

@@ -8,18 +8,41 @@ class ErrorResponder(Responder):
 
 
 class DatasetResponder(Responder):
-    TYPE = 'attributes'
+    TYPE = 'data'
     SERIALIZER = DatasetSchema
 
-    def deserialize(self, dataset):
-        dataset = dataset.get('dataset', {}).get('data')
-        dataset = self.SERIALIZER(only=[self.TYPE]).dump(dataset)
-        return dataset.data.get(self.TYPE)
+    def deserialize(self, dataset, from_filter=True):
+        if from_filter:
+            dataset = dataset.get('dataset', {})
+        dataset = dataset.get(self.TYPE)
+        dataset = self.SERIALIZER().dump(dataset).data
+        return dataset
 
 
 class QueryResponder(Responder):
     TYPE = 'data'
     SERIALIZER = QuerySchema
+
+    def deserialize(self, query):
+        query = query.get(self.TYPE)
+        query = self.SERIALIZER().dump(query).data
+        return query
+
+    def serialize(self, features):
+        result = features
+
+        def get_values(feature):
+            for key, value in feature.get('properties').iteritems():
+                feature[key] = value
+
+            feature['the_geom'] = feature['geometry']
+            del feature['type']
+            del feature['properties']
+            del feature['geometry']
+            return feature
+
+        result = map(get_values, result)
+        return result
 
 
 class FieldsResponder(Responder):

@@ -17,6 +17,7 @@ class QuerySchema(Schema):
     type = fields.Str(default='query')
     attributes = fields.Dict()
     result = fields.Integer(default=0)
+    relationships = fields.Dict()
 
 
 class FieldsSchema(Schema):
