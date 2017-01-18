@@ -46,8 +46,8 @@ def create_application():
         info = info,
         swagger = swagger,
         mode = CTRegisterMicroserviceFlask.AUTOREGISTER_MODE,
-        ct_url = os.environ['CT_URL'],
-        url = os.environ['LOCAL_URL']
+        ct_url = os.getenv('CT_URL'),
+        url = os.getenv('LOCAL_URL')
     )
 
     return application

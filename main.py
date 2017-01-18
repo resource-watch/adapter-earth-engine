@@ -8,6 +8,6 @@ application = create_application()
 if __name__ == '__main__':
     application.run(
         host = '0.0.0.0',
-        port = int(os.environ['PORT']),
-        debug = os.environ['DEBUG'] == 'True'
+        port = int(os.getenv('PORT')),
+        debug = os.getenv('DEBUG') == 'True'
     )
