@@ -1,5 +1,11 @@
-from . import base, dev, staging, prod
+import os
+from . import base, staging, prod
 
 settings = base.settings
 
-# @ TODO -> get (and override) config from different stages
+if os.getenv('ENVIRONMENT') == 'staging':
+    settings.update(staging.settings)
+
+
+if os.getenv('ENVIRONMENT') == 'prod':
+    settings.update(prod.settings)

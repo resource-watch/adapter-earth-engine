@@ -140,7 +140,6 @@ def download(dataset_id):
 
     format = request.args.get('format', None)
     if format == 'csv':
-        print
         return Response(generate_csv(),
             mimetype='text/csv',
             headers={
@@ -156,6 +155,7 @@ def download(dataset_id):
                 'Content-type': 'application/json'
             }
         )
+        
 
 
 @endpoints.route('/rest-datasets/gee', methods=['POST'])
