@@ -39,3 +39,30 @@ def quote_table(query, type='sql'):
     table = regex.search(query).group(1)
     query = query.replace(table, '\"'+table+'\"')
     return query
+
+
+def get_geojson(geostore_id):
+    logging.info('Getting Geojson')
+    try:
+        config = {
+            'uri': '/geostore/'+geostore_id,
+            'method': 'GET'
+        }
+        response = request_to_microservice(config)
+    except Exception as error:
+        raise error
+
+    if response.get('errors'):
+        errors = response.get('errors')
+        raise GeojsonNotFound(message=errors[0].get('detail'))
+
+    return response.get('data', {}).get('attributes')
+
+
+def get_type(table_name):
+    logging.info('Getting Dataset Type')
+
+    if 'ft:' in table_name:
+        return 'ft'
+    else:
+        return 'raster'

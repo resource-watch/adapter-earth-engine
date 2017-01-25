@@ -23,3 +23,12 @@ class GEEQueryError(Error):
          name='GEEQueryError',
          message=message
      )
+
+
+class GeojsonNotFound(Error):
+
+    def __init__(self, message):
+        Error.__init__(self,
+         name='GeojsonNotFound',
+         message=message
+     )
