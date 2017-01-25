@@ -8,8 +8,8 @@ def query(query):
     logging.info('Executing Query: '+query)
 
     try:
-        q = SQL2GEE(query)
-        response = q.execute()
+        q = SQL2GEE(sql=query, geojson=None, flags=None)
+        response = q.response
     except Exception as error:
         raise GEEQueryError(error)
 

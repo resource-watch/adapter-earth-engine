@@ -81,7 +81,7 @@ def fields(dataset_id):
         return jsonify(response), 500
 
     fields = FieldsResponder().serialize(response.get('columns', {}))
-    response = FieldsResponder.build({'table_id': response.get('id', None), 'fields': fields})
+    response = FieldsResponder.build({'tableName': table_name, 'fields': fields})
     return jsonify(response), 200
 
 

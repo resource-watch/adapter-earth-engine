@@ -23,7 +23,7 @@ gee_credentials = ServiceAccountCredentials.from_p12_keyfile(
     gee.get('service_account'),
     gee.get('privatekey_file'),
     scopes = ee.oauth.SCOPE
- )
+)
 
 ee.Initialize(gee_credentials)
 

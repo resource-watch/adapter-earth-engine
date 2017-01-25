@@ -21,5 +21,5 @@ class QuerySchema(Schema):
 
 
 class FieldsSchema(Schema):
-    table_id = fields.Str(default=None)
+    tableName = fields.Str(default=None)
     fields = fields.Dict()
