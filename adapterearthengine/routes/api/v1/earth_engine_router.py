@@ -213,7 +213,7 @@ def download(dataset_id):
                 yield row.read()
         elif table_type is 'raster':
             for key in response.keys():
-                writer.writerow(response[key])
+                writer.writerow([response[key]])
                 yield row.read()
 
     def generate_json():
@@ -229,7 +229,6 @@ def download(dataset_id):
         elif table_type is 'raster':
             k_len = len(response.keys())
             yield '"data": ['
-            logging.debug(response.keys())
             for idx, key in enumerate(response.keys()):
                 if idx != k_len-1:
                     yield json.dumps(response[key]) + ', '
