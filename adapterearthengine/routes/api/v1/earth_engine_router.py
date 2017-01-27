@@ -21,7 +21,7 @@ def query(dataset_id):
     # Get and deserialize
     dataset = DatasetResponder().deserialize(request.get_json())
     # @TODO
-    dataset_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
+    table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
     sql = request.args.get('sql', None) or request.get_json().get('sql', None)
     fs = request.args.get('fs', None) or request.get_json().get('fs', None)
@@ -66,23 +66,29 @@ def query(dataset_id):
         response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
         return jsonify(response), 500
 
-    if not isinstance(response, list):
-        features = [response]
-    else:
+    if table_type is 'ft':
+        if not isinstance(response, dict):
+            value = response
+            response = {
+                'features': [{'FUNCTION': value}]
+            }
         features = QueryResponder().serialize(response.get('features', {}))
 
-    #response = QueryResponder().serialize(response.get('features', {}))
-    #response = QueryResponder.build({'attributes': response})
-
     def generate_json():
-        f_len = len(features)
-        yield '{"data": {"attributes": ['
-        for idx, feature in enumerate(features):
-            if idx != f_len-1:
-                yield json.dumps(feature) + ', '
-            else:
-                yield json.dumps(feature)
-        yield ']}}'
+        yield '{"cloneUrl": ' + json.dumps(QueryService.get_clone_url(dataset.get('id'))) + ','
+        if table_type is 'ft':
+            f_len = len(features)
+            yield '"data": ['
+            for idx, feature in enumerate(features):
+                if idx != f_len-1:
+                    yield json.dumps(feature) + ', '
+                else:
+                    yield json.dumps(feature)
+            yield ']}'
+        elif table_type is 'raster':
+            yield '"data": ['
+            yield json.dumps(response)
+            yield ']}'
 
     #return jsonify(response), 200
     return Response(stream_with_context(generate_json()),
@@ -100,6 +106,13 @@ def fields(dataset_id):
 
     # Build query
     table_name = dataset.get('attributes').get('tableName')
+    # @TODO
+    table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
+
+    if table_type is 'raster':
+        response = FieldsResponder.build({'tableName': table_name, 'fields': []})
+        return jsonify(response), 200
+
     sql = 'SELECT * FROM ' + table_name + ' LIMIT 1'
 
     # Convert query
@@ -125,7 +138,7 @@ def download(dataset_id):
     # Get and deserialize
     dataset = DatasetResponder().deserialize(request.get_json())
     # @TODO
-    dataset_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
+    table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
     sql = request.args.get('sql', None) or request.get_json().get('sql', None)
     fs = request.args.get('fs', None) or request.get_json().get('fs', None)
@@ -162,9 +175,12 @@ def download(dataset_id):
         response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
         return jsonify(response), 500
 
-    if type(response) is int or type(response) is float:
-        features = [float(response)]
-    else:
+    if table_type is 'ft':
+        if not isinstance(response, dict):
+            value = response
+            response = {
+                'features': [{'FUNCTION': value}]
+            }
         features = QueryResponder().serialize(response.get('features', {}))
 
     class Row(object):
@@ -178,7 +194,11 @@ def download(dataset_id):
     def generate_csv():
         row = Row()
         writer = csv.writer(row)
-        writer.writerow(features[0].keys())
+        if table_type is 'ft':
+            writer.writerow(features[0].keys())
+        elif table_type is 'raster':
+            writer.writerow(response.keys())
+
         yield row.read()
 
         def encode_feature_values(value):
@@ -187,19 +207,35 @@ def download(dataset_id):
             else:
                 return value
 
-        for feature in features:
-            writer.writerow(map(encode_feature_values, feature.values()))
-            yield row.read()
+        if table_type is 'ft':
+            for feature in features:
+                writer.writerow(map(encode_feature_values, feature.values()))
+                yield row.read()
+        elif table_type is 'raster':
+            for key in response.keys():
+                writer.writerow(response[key])
+                yield row.read()
 
     def generate_json():
-        f_len = len(features)
-        yield '{"data": ['
-        for idx, feature in enumerate(features):
-            if idx != f_len-1:
-                yield json.dumps(feature) + ', '
-            else:
-                yield json.dumps(feature)
-        yield ']}'
+        if table_type is 'ft':
+            f_len = len(features)
+            yield '"data": ['
+            for idx, feature in enumerate(features):
+                if idx != f_len-1:
+                    yield json.dumps(feature) + ', '
+                else:
+                    yield json.dumps(feature)
+            yield ']}'
+        elif table_type is 'raster':
+            k_len = len(response.keys())
+            yield '"data": ['
+            logging.debug(response.keys())
+            for idx, key in enumerate(response.keys()):
+                if idx != k_len-1:
+                    yield json.dumps(response[key]) + ', '
+                else:
+                    yield json.dumps(response[key])
+            yield ']}'
 
     format = request.args.get('format', None)
     if format == 'csv':

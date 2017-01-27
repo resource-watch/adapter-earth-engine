@@ -41,7 +41,9 @@ class QueryResponder(Responder):
             del feature['geometry']
             return feature
 
-        result = map(get_values, result)
+        if len(result) and 'properties' in result[0]:
+            result = map(get_values, result)
+
         return result
 
 

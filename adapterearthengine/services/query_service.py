@@ -37,7 +37,8 @@ def convert(query, type='sql'):
 def quote_table(query, type='sql'):
     regex = re.compile(r'from ([a-zA-Z0-9_:-]*)', re.IGNORECASE)
     table = regex.search(query).group(1)
-    query = query.replace(table, '\"'+table+'\"')
+    if get_type(table) is 'ft':
+        query = query.replace(table, '\"'+table+'\"')
     return query
 
 
@@ -66,3 +67,19 @@ def get_type(table_name):
         return 'ft'
     else:
         return 'raster'
+
+
+def get_clone_url(dataset_id):
+    return {
+        'httpMethod': 'POST',
+        'url': '/dataset/'+dataset_id,
+        'body': {
+            'dataset': {
+                'datasetUrl': '/query/'+dataset_id,
+                'application': [
+                    'your',
+                    'apps'
+                ]
+            }
+        }
+    }
