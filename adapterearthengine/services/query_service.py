@@ -31,7 +31,8 @@ def convert(query, type='sql'):
 
     query = QueryResponder().deserialize(response)
     query = query.get('attributes', {}).get('query')
-    return quote_table(query, type)
+    #return quote_table(query, type)
+    return query
 
 
 def quote_table(query, type='sql'):

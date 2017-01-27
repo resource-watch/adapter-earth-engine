@@ -113,7 +113,7 @@ def fields(dataset_id):
         response = FieldsResponder.build({'tableName': table_name, 'fields': []})
         return jsonify(response), 200
 
-    sql = 'SELECT * FROM ' + table_name + ' LIMIT 1'
+    sql = 'SELECT * FROM \"' + table_name + '\" LIMIT 1'
 
     # Convert query
     query = QueryService.convert(sql, type='sql')
@@ -264,7 +264,7 @@ def register_dataset():
     table_name = request.get_json().get('connector').get('table_name')
     table_type = QueryService.get_type(table_name=table_name)
 
-    sql = 'SELECT * FROM ' + table_name + ' LIMIT 1'
+    sql = 'SELECT * FROM \"' + table_name + '\" LIMIT 1'
 
     if table_type is 'raster':
         sql = 'SELECT ST_SUMMARYSTATS() from '+table_name
