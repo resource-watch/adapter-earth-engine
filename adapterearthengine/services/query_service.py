@@ -7,7 +7,7 @@ from adapterearthengine.errors import SqlFormatError
 
 
 def convert(query, type='sql'):
-    logging.info('Converting Query')
+    logging.info('Converting Query: '+query)
 
     if not query:
         raise SqlFormatError(message='sql or fs not provided')
