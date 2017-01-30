@@ -4,13 +4,13 @@ import csv
 import StringIO
 import logging
 
-from flask import jsonify, request, Response
+from flask import jsonify, request, Response, stream_with_context
 import requests
 
 from . import endpoints
 from adapterearthengine.responders import ErrorResponder, DatasetResponder, QueryResponder, FieldsResponder
 from adapterearthengine.services import EarthEngineService, QueryService
-from adapterearthengine.errors import SqlFormatError, GEEQueryError
+from adapterearthengine.errors import SqlFormatError, GEEQueryError, GeojsonNotFound
 from adapterearthengine.utils.http import request_to_microservice
 
 @endpoints.route('/query/<dataset_id>', methods=['POST'])
@@ -20,6 +20,9 @@ def query(dataset_id):
 
     # Get and deserialize
     dataset = DatasetResponder().deserialize(request.get_json())
+    # @TODO
+    table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
+
     sql = request.args.get('sql', None) or request.get_json().get('sql', None)
     fs = request.args.get('fs', None) or request.get_json().get('fs', None)
 
@@ -30,13 +33,27 @@ def query(dataset_id):
         })
         return jsonify(response), 400
 
+    geojson = None
+    geostore = request.args.get('geostore', None)
+    if geostore:
+        try:
+            geojson = QueryService.get_geojson(geostore)
+        except GeojsonNotFound as error:
+            logging.error(error.message)
+            response = ErrorResponder.build({'status': 400, 'message': error.message})
+            return jsonify(response), 400
+        except Exception as error:
+            response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
+            return jsonify(response), 500
+    #@TODO select * from table where st_intersects(st_asgeojson('{}'), the_geom)
+
     # Query format and query to GEE
     try:
         if fs:
             query = QueryService.convert(fs, type='fs')
         else:
             query = QueryService.convert(sql, type='sql')
-        response = EarthEngineService.query(query)
+        response = EarthEngineService.query(query, geojson=geojson)
     except SqlFormatError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 400, 'message': error.message})
@@ -49,13 +66,34 @@ def query(dataset_id):
         response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
         return jsonify(response), 500
 
-    if type(response) is int or type(response) is float:
-        response = QueryResponder.build({'result': float(response)})
-        return jsonify(response), 200
+    if table_type is 'ft':
+        if not isinstance(response, dict):
+            value = response
+            response = {
+                'features': [{'FUNCTION': value}]
+            }
+        features = QueryResponder().serialize(response.get('features', {}))
 
-    response = QueryResponder().serialize(response.get('features', {}))
-    response = QueryResponder.build({'attributes': response})
-    return jsonify(response), 200
+    def generate_json():
+        yield '{"cloneUrl": ' + json.dumps(QueryService.get_clone_url(dataset.get('id'))) + ','
+        if table_type is 'ft':
+            f_len = len(features)
+            yield '"data": ['
+            for idx, feature in enumerate(features):
+                if idx != f_len-1:
+                    yield json.dumps(feature) + ', '
+                else:
+                    yield json.dumps(feature)
+            yield ']}'
+        elif table_type is 'raster':
+            yield '"data": ['
+            yield json.dumps(response)
+            yield ']}'
+
+    #return jsonify(response), 200
+    return Response(stream_with_context(generate_json()),
+        mimetype='application/json',
+    )
 
 
 @endpoints.route('/fields/<dataset_id>', methods=['POST'])
@@ -68,7 +106,14 @@ def fields(dataset_id):
 
     # Build query
     table_name = dataset.get('attributes').get('tableName')
-    sql = 'SELECT * FROM ' + table_name + ' LIMIT 1'
+    # @TODO
+    table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
+
+    if table_type is 'raster':
+        response = FieldsResponder.build({'tableName': table_name, 'fields': []})
+        return jsonify(response), 200
+
+    sql = 'SELECT * FROM \"' + table_name + '\" LIMIT 1'
 
     # Convert query
     query = QueryService.convert(sql, type='sql')
@@ -81,7 +126,7 @@ def fields(dataset_id):
         return jsonify(response), 500
 
     fields = FieldsResponder().serialize(response.get('columns', {}))
-    response = FieldsResponder.build({'table_id': response.get('id', None), 'fields': fields})
+    response = FieldsResponder.build({'tableName': table_name, 'fields': fields})
     return jsonify(response), 200
 
 
@@ -92,6 +137,9 @@ def download(dataset_id):
 
     # Get and deserialize
     dataset = DatasetResponder().deserialize(request.get_json())
+    # @TODO
+    table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
+
     sql = request.args.get('sql', None) or request.get_json().get('sql', None)
     fs = request.args.get('fs', None) or request.get_json().get('fs', None)
 
@@ -102,13 +150,19 @@ def download(dataset_id):
         })
         return jsonify(response), 400
 
+    geojson = None
+    geostore = request.args.get('geostore', None)
+    if geostore:
+        geojson = QueryService.get_geojson()
+    #@TODO select * from table where st_intersects(st_asgeojson('{}'), the_geom)
+
     # Query format and query to GEE
     try:
         if fs:
            query = QueryService.convert(fs, type='fs')
         else:
            query = QueryService.convert(sql, type='sql')
-        response = EarthEngineService.query(query)
+        response = EarthEngineService.query(query, geojson=geojson)
     except SqlFormatError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 400, 'message': error.message})
@@ -121,35 +175,70 @@ def download(dataset_id):
         response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
         return jsonify(response), 500
 
-    if type(response) is int or type(response) is float:
-        features = [float(response)]
-    else:
+    if table_type is 'ft':
+        if not isinstance(response, dict):
+            value = response
+            response = {
+                'features': [{'FUNCTION': value}]
+            }
         features = QueryResponder().serialize(response.get('features', {}))
 
-    f_len = len(features)
+    class Row(object):
+        def __init__(self):
+            self.row = None
+        def write(self, row):
+            self.row = row
+        def read(self):
+            return self.row
 
     def generate_csv():
-        si = StringIO.StringIO()
-        writer = csv.writer(si)
-        for idx, feature in enumerate(features):
-            if idx == 0:
-                writer.writerow(feature.keys())
+        row = Row()
+        writer = csv.writer(row)
+        if table_type is 'ft':
+            writer.writerow(features[0].keys())
+        elif table_type is 'raster':
+            writer.writerow(response.keys())
+
+        yield row.read()
+
+        def encode_feature_values(value):
+            if isinstance(value, basestring):
+                return value.encode('utf-8')
             else:
-                writer.writerow(feature.values())
-        yield si.getvalue() # @TODO Stream Response
+                return value
+
+        if table_type is 'ft':
+            for feature in features:
+                writer.writerow(map(encode_feature_values, feature.values()))
+                yield row.read()
+        elif table_type is 'raster':
+            for key in response.keys():
+                writer.writerow([response[key]])
+                yield row.read()
 
     def generate_json():
-        yield '{"data": ['
-        for idx, feature in enumerate(features):
-            if idx != f_len-1:
-                yield json.dumps(feature) + ', '
-            else:
-                yield json.dumps(feature)
-        yield ']}'
+        if table_type is 'ft':
+            f_len = len(features)
+            yield '"data": ['
+            for idx, feature in enumerate(features):
+                if idx != f_len-1:
+                    yield json.dumps(feature) + ', '
+                else:
+                    yield json.dumps(feature)
+            yield ']}'
+        elif table_type is 'raster':
+            k_len = len(response.keys())
+            yield '"data": ['
+            for idx, key in enumerate(response.keys()):
+                if idx != k_len-1:
+                    yield json.dumps(response[key]) + ', '
+                else:
+                    yield json.dumps(response[key])
+            yield ']}'
 
     format = request.args.get('format', None)
     if format == 'csv':
-        return Response(generate_csv(),
+        return Response(stream_with_context(generate_csv()),
             mimetype='text/csv',
             headers={
                 'Content-Disposition': 'attachment; filename=export.csv',
@@ -157,14 +246,13 @@ def download(dataset_id):
             }
         )
     else:
-        return Response(generate_json(),
+        return Response(stream_with_context(generate_json()),
             mimetype='application/json',
             headers={
                 'Content-Disposition': 'attachment; filename=export.json',
                 'Content-type': 'application/json'
             }
         )
-
 
 
 @endpoints.route('/rest-datasets/gee', methods=['POST'])
@@ -174,7 +262,12 @@ def register_dataset():
 
     # Build query
     table_name = request.get_json().get('connector').get('table_name')
-    sql = 'SELECT * FROM ' + table_name + ' LIMIT 1'
+    table_type = QueryService.get_type(table_name=table_name)
+
+    sql = 'SELECT * FROM \"' + table_name + '\" LIMIT 1'
+
+    if table_type is 'raster':
+        sql = 'SELECT ST_SUMMARYSTATS() from '+table_name
 
     # Convert query
     query = QueryService.convert(sql, type='sql')

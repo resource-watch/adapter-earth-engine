@@ -5,8 +5,8 @@ bind = '0.0.0.0:5700'
 backlog = 2048
 
 worker_class = 'gevent'
-workers = multiprocessing.cpu_count() * 2 + 1
-threads = multiprocessing.cpu_count() * 2
+workers = 2
+threads = 1
 worker_connections = 1000
 timeout = 30
 keepalive = 2

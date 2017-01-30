@@ -13,13 +13,11 @@ class DatasetSchema(Schema):
 
 
 class QuerySchema(Schema):
-    id = fields.Str(default=None)
-    type = fields.Str(default='query')
-    attributes = fields.Dict(default={})
-    result = fields.Float(default=0.0)
-    relationships = fields.Dict(default={})
+    id = fields.Str()
+    type = fields.Str()
+    attributes = fields.Dict()
 
 
 class FieldsSchema(Schema):
-    table_id = fields.Str(default=None)
+    tableName = fields.Str(default=None)
     fields = fields.Dict()
