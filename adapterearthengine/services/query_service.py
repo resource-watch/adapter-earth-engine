@@ -30,9 +30,10 @@ def convert(query, type='sql'):
         raise SqlFormatError(message=errors[0].get('detail'))
 
     query = QueryResponder().deserialize(response)
-    query = query.get('attributes', {}).get('query')
-    #return quote_table(query, type)
-    return query
+    s_query = query.get('attributes', {}).get('query')
+    json_sql = query.get('attributes', {}).get('jsonSql')
+
+    return s_query, json_sql
 
 
 def quote_table(query, type='sql'):
@@ -43,23 +44,8 @@ def quote_table(query, type='sql'):
     return query
 
 
-def get_geojson(geostore_id):
-    logging.info('Getting Geojson')
-    try:
-        config = {
-            'uri': '/geostore/'+geostore_id,
-            'method': 'GET'
-        }
-        response = request_to_microservice(config)
-    except Exception as error:
-        raise error
-
-    if response.get('errors'):
-        errors = response.get('errors')
-        raise GeojsonNotFound(message=errors[0].get('detail'))
-
-    return response.get('data', {}).get('attributes').get('geojson')
-
+def get_geojson(json_sql):
+    pass
 
 def get_type(table_name):
     logging.info('Getting Dataset Type')
