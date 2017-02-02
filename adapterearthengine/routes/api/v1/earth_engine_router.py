@@ -20,7 +20,6 @@ def query(dataset_id):
 
     # Get and deserialize
     dataset = DatasetResponder().deserialize(request.get_json())
-    # @TODO
     table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
     sql = request.args.get('sql', None) or request.get_json().get('sql', None)
@@ -45,7 +44,6 @@ def query(dataset_id):
         except Exception as error:
             response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
             return jsonify(response), 500
-    #@TODO select * from table where st_intersects(st_asgeojson('{}'), the_geom)
 
     # Query format and query to GEE
     try:
@@ -90,7 +88,6 @@ def query(dataset_id):
             yield json.dumps(response)
             yield ']}'
 
-    #return jsonify(response), 200
     return Response(stream_with_context(generate_json()),
         mimetype='application/json',
     )
@@ -106,7 +103,6 @@ def fields(dataset_id):
 
     # Build query
     table_name = dataset.get('attributes').get('tableName')
-    # @TODO
     table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
     if table_type is 'raster':
@@ -137,7 +133,6 @@ def download(dataset_id):
 
     # Get and deserialize
     dataset = DatasetResponder().deserialize(request.get_json())
-    # @TODO
     table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
     sql = request.args.get('sql', None) or request.get_json().get('sql', None)
@@ -267,7 +262,7 @@ def register_dataset():
     sql = 'SELECT * FROM \"' + table_name + '\" LIMIT 1'
 
     if table_type is 'raster':
-        sql = 'SELECT ST_SUMMARYSTATS() from '+table_name
+        sql = 'SELECT ST_SUMMARYSTATS() from \"'+table_name+'\"'
 
     # Convert query
     query = QueryService.convert(sql, type='sql')

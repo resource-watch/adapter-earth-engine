@@ -58,7 +58,7 @@ def get_geojson(geostore_id):
         errors = response.get('errors')
         raise GeojsonNotFound(message=errors[0].get('detail'))
 
-    return response.get('data', {}).get('attributes')
+    return response.get('data', {}).get('attributes').get('geojson')
 
 
 def get_type(table_name):
