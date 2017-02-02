@@ -45,7 +45,26 @@ def quote_table(query, type='sql'):
 
 
 def get_geojson(json_sql):
-    pass
+
+    where = json_sql.get('where', None)
+    if where:
+        firstnode = where
+
+    def check_node(node):
+        if node.get('type') == 'function' and node.get('value') == 'ST_INTERSECTS':
+            st_intersects_arguments = node.get('arguments')[0]
+            if st_intersects_arguments.get('type') == 'function' and st_intersects_arguments.get('value') == 'ST_SetSRID':
+                st_setsrid_arguments = st_intersects_arguments.get('arguments')[0]
+                if st_setsrid_arguments.get('type') == 'function' and st_setsrid_arguments.get('value') == 'ST_GeomFromGeoJSON':
+                    st_geomfromgeojson_arguments = st_setsrid_arguments.get('arguments')[0]
+                    return st_geomfromgeojson_arguments
+        else:
+            return check_node(node.get('arguments'))
+
+    geojson = check_node(firstnode)
+    geojson = geojson.get('value')
+    return geojson
+
 
 def get_type(table_name):
     logging.info('Getting Dataset Type')

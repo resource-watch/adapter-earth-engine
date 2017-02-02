@@ -153,27 +153,43 @@ def download(dataset_id):
         })
         return jsonify(response), 400
 
-    geojson = None
-    geostore = request.args.get('geostore', None)
-    if geostore:
-        geojson = QueryService.get_geojson()
+    # geostore
+    geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
+    if geostore and sql:
+        sql = sql+'&geostore='+geostore
+    if geostore and fs:
+        fs = fs+'&geostore='+geostore
 
-    # Query format and query to GEE
+    # convert
     try:
         if fs:
-           query = QueryService.convert(fs, type='fs')
+            query, json_sql = QueryService.convert(fs, type='fs')
         else:
-           query = QueryService.convert(sql, type='sql')
-        response = EarthEngineService.query(query, geojson=geojson)
+            query, json_sql = QueryService.convert(sql, type='sql')
     except SqlFormatError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 400, 'message': error.message})
+        return jsonify(response), 400
+    except Exception as error:
+        response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
         return jsonify(response), 500
+
+    # geojson
+    geojson = None
+    try:
+        if query.index('ST_INTERSECTS'):
+            geojson = QueryService.get_geojson(json_sql)
+    except:
+        pass
+
+    # query
+    try:
+        response = EarthEngineService.query(query, geojson=geojson)
     except GEEQueryError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 500, 'message': error.message})
         return jsonify(response), 500
-    except:
+    except Exception as error:
         response = ErrorResponder.build({'status': 500, 'message': 'Generic Error'})
         return jsonify(response), 500
 
