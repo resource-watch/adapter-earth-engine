@@ -262,7 +262,7 @@ def register_dataset():
     sql = 'SELECT * FROM \"' + table_name + '\" LIMIT 1'
 
     if table_type is 'raster':
-        sql = 'SELECT ST_SUMMARYSTATS() from \"'+table_name+'\"'
+        sql = 'SELECT ST_METADATA() from \"'+table_name+'\"'
 
     # Convert query
     query = QueryService.convert(sql, type='sql')
