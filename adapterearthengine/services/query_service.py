@@ -1,24 +1,28 @@
 import logging
 import re
 
+from CTRegisterMicroserviceFlask import request_to_microservice
+
 from adapterearthengine.responders import QueryResponder
-from adapterearthengine.utils.http import request_to_microservice
 from adapterearthengine.errors import SqlFormatError
 
 
-def convert(query, type='sql'):
-    logging.info('Converting Query: '+query)
-
+def convert(query, query_type='sql'):
     if not query:
         raise SqlFormatError(message='sql or fs not provided')
 
-    query_type = 'sql2SQL?sql='+query
-    if type == 'fs':
-        query_type = 'fs2SQL' # @TODO
+    logging.info('Converting Query: '+query)
+
+    endpoint = 'sql2SQL'
+    if query_type == 'fs':
+        endpoint = 'fs2SQL'
+
+    result = endpoint+query
+    logging.info(result)
 
     try:
         config = {
-            'uri': '/convert/'+query_type,
+            'uri': '/convert/'+result,
             'method': 'GET'
         }
         response = request_to_microservice(config)

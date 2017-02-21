@@ -1,17 +1,18 @@
 import os
 import json
 import csv
+import copy
 import StringIO
 import logging
 
 from flask import jsonify, request, Response, stream_with_context
+from CTRegisterMicroserviceFlask import request_to_microservice
 import requests
 
 from . import endpoints
 from adapterearthengine.responders import ErrorResponder, DatasetResponder, QueryResponder, FieldsResponder
 from adapterearthengine.services import EarthEngineService, QueryService
 from adapterearthengine.errors import SqlFormatError, GEEQueryError, GeojsonNotFound
-from adapterearthengine.utils.http import request_to_microservice
 
 @endpoints.route('/query/<dataset_id>', methods=['POST'])
 def query(dataset_id):
@@ -22,29 +23,32 @@ def query(dataset_id):
     dataset = DatasetResponder().deserialize(request.get_json())
     table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
-    sql = request.args.get('sql', None) or request.get_json().get('sql', None)
-    fs = request.args.get('fs', None) or request.get_json().get('fs', None)
+    sql = request.args.get('sql', None) # or request.get_json().get('sql', None)
 
-    if not sql and not fs:
-        response = ErrorResponder.build({
-            'status': 400,
-            'message': 'sql or fs param is required'
-        })
-        return jsonify(response), 400
+    if sql:
+        result_query = '?sql='+sql
+    else:
+        fs = copy.deepcopy(request.args) # or copy.deepcopy(request.get_json())
+        if fs.get('dataset'):
+            del fs['dataset']
+
+        result_query = '?tableName="' + dataset.get('attributes', None).get('tableName') + '"'
+        for key in fs.keys():
+            param = '&' + key + '=' + fs.get(key)
+            result_query += param
 
     # geostore
-    geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
-    if geostore and sql:
-        sql = sql+'&geostore='+geostore
-    if geostore and fs:
-        fs = fs+'&geostore='+geostore
+    geostore = request.args.get('geostore', None) # or request.get_json().get('geostore', None)
+    if geostore:
+        result_query = result_query+'&geostore='+geostore
 
     # convert
     try:
-        if fs:
-            query, json_sql = QueryService.convert(fs, type='fs')
+        if sql:
+            query_type='sql'
         else:
-            query, json_sql = QueryService.convert(sql, type='sql')
+            query_type='fs'
+        query, json_sql = QueryService.convert(result_query, query_type=query_type)
     except SqlFormatError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 400, 'message': error.message})
@@ -63,7 +67,7 @@ def query(dataset_id):
 
     # query
     try:
-        response = EarthEngineService.query(query, geojson=geojson)
+        response = EarthEngineService.execute_query(query, geojson=geojson)
     except GEEQueryError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 500, 'message': error.message})
@@ -120,10 +124,10 @@ def fields(dataset_id):
     sql = 'SELECT * FROM \"' + table_name + '\" LIMIT 1'
 
     # Convert query
-    query = QueryService.convert(sql, type='sql')
+    query, json_sql = QueryService.convert(sql, query_type='sql')
 
     try:
-        response = EarthEngineService.query(query)
+        response = EarthEngineService.execute_query(query)
     except GEEQueryError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 500, 'message': error.message})
@@ -143,29 +147,32 @@ def download(dataset_id):
     dataset = DatasetResponder().deserialize(request.get_json())
     table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
-    sql = request.args.get('sql', None) or request.get_json().get('sql', None)
-    fs = request.args.get('fs', None) or request.get_json().get('fs', None)
+    sql = request.args.get('sql', None) # or request.get_json().get('sql', None)
 
-    if not sql and not fs:
-        response = ErrorResponder.build({
-            'status': 400,
-            'message': 'sql or fs param is required'
-        })
-        return jsonify(response), 400
+    if sql:
+        result_query = '?sql='+sql
+    else:
+        fs = copy.deepcopy(request.args) # or copy.deepcopy(request.get_json())
+        if fs.get('dataset'):
+            del fs['dataset']
+
+        result_query = '?tableName="' + dataset.get('attributes', None).get('tableName') + '"'
+        for key in fs.keys():
+            param = '&' + key + '=' + fs.get(key)
+            result_query += param
 
     # geostore
-    geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
-    if geostore and sql:
-        sql = sql+'&geostore='+geostore
-    if geostore and fs:
-        fs = fs+'&geostore='+geostore
+    geostore = request.args.get('geostore', None) # or request.get_json().get('geostore', None)
+    if geostore:
+        result_query = result_query+'&geostore='+geostore
 
     # convert
     try:
-        if fs:
-            query, json_sql = QueryService.convert(fs, type='fs')
+        if sql:
+            query_type='sql'
         else:
-            query, json_sql = QueryService.convert(sql, type='sql')
+            query_type='fs'
+        query, json_sql = QueryService.convert(result_query, query_type=query_type)
     except SqlFormatError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 400, 'message': error.message})
@@ -184,7 +191,7 @@ def download(dataset_id):
 
     # query
     try:
-        response = EarthEngineService.query(query, geojson=geojson)
+        response = EarthEngineService.execute_query(query, geojson=geojson)
     except GEEQueryError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 500, 'message': error.message})
@@ -288,19 +295,19 @@ def register_dataset():
         sql = 'SELECT ST_METADATA() from \"'+table_name+'\"'
 
     # Convert query
-    query = QueryService.convert(sql, type='sql')
+    query, json_sql = QueryService.convert(sql, query_type='sql')
 
     try:
-        response = EarthEngineService.query(query)
+        response = EarthEngineService.execute_query(query)
+        status = 1
     except GEEQueryError as error:
         logging.error(error.message)
-        response = ErrorResponder.build({'status': 500, 'message': error.message})
-        return jsonify(response), 500
+        status = 2
 
     config = {
         'uri': '/dataset/'+request.get_json().get('connector').get('id'),
         'method': 'PATCH',
-        'body': {'status': 1}
+        'body': {'status': status}
     }
     response = request_to_microservice(config)
     return jsonify(response), 200
