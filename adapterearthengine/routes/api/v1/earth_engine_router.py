@@ -25,7 +25,7 @@ def query(dataset_id):
 
     sql = request.args.get('sql', None) # or request.get_json().get('sql', None)
 
-    if sql:
+    if sql != None:
         result_query = '?sql='+sql
     else:
         fs = copy.deepcopy(request.args) # or copy.deepcopy(request.get_json())

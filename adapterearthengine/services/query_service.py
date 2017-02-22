@@ -10,6 +10,8 @@ from adapterearthengine.errors import SqlFormatError
 def convert(query, query_type='sql'):
     if not query:
         raise SqlFormatError(message='sql or fs not provided')
+    if query_type == 'fs' and not '&' in query:
+        raise SqlFormatError(message='sql or fs not provided')
 
     logging.info('Converting Query: '+query)
 
@@ -18,7 +20,6 @@ def convert(query, query_type='sql'):
         endpoint = 'fs2SQL'
 
     result = endpoint+query
-    logging.info(result)
 
     try:
         config = {
