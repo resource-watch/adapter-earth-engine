@@ -1,7 +1,7 @@
 {
 	"name": "#(service.name)",
 	"endpoints": [{
-		"path": "/query/:dataset",
+		"path": "/v1/query/:dataset",
 		"method": "GET",
 		"binary": true,
 		"redirect": {
@@ -10,7 +10,7 @@
 		},
 		"filters": [{
 			"name": "dataset",
-			"path": "/dataset/:dataset",
+			"path": "/v1/dataset/:dataset",
 			"method": "GET",
 			"params": {
 				"dataset": "dataset"
@@ -24,7 +24,7 @@
 			}
 		}]
 	}, {
-		"path": "/query/:dataset",
+		"path": "/v1/query/:dataset",
 		"method": "POST",
 		"binary": true,
 		"redirect": {
@@ -33,7 +33,7 @@
 		},
 		"filters": [{
 			"name": "dataset",
-			"path": "/dataset/:dataset",
+			"path": "/v1/dataset/:dataset",
 			"method": "GET",
 			"params": {
 				"dataset": "dataset"
@@ -47,7 +47,7 @@
 			}
 		}]
 	},{
-		"path": "/download/:dataset",
+		"path": "/v1/download/:dataset",
 		"method": "GET",
 		"binary": true,
 		"redirect": {
@@ -56,7 +56,7 @@
 		},
 		"filters": [{
 			"name": "dataset",
-			"path": "/dataset/:dataset",
+			"path": "/v1/dataset/:dataset",
 			"method": "GET",
 			"params": {
 				"dataset": "dataset"
@@ -70,7 +70,7 @@
 			}
 		}]
 	}, {
-		"path": "/download/:dataset",
+		"path": "/v1/download/:dataset",
 		"method": "POST",
 		"binary": true,
 		"redirect": {
@@ -79,7 +79,7 @@
 		},
 		"filters": [{
 			"name": "dataset",
-			"path": "/dataset/:dataset",
+			"path": "/v1/dataset/:dataset",
 			"method": "GET",
 			"params": {
 				"dataset": "dataset"
@@ -93,7 +93,7 @@
 			}
 		}]
 	}, {
-		"path": "/fields/:dataset",
+		"path": "/v1/fields/:dataset",
 		"method": "GET",
 		"redirect": {
 			"method": "POST",
@@ -101,7 +101,7 @@
 		},
 		"filters": [{
 			"name": "dataset",
-			"path": "/dataset/:dataset",
+			"path": "/v1/dataset/:dataset",
 			"method": "GET",
 			"params": {
 				"dataset": "dataset"
@@ -115,7 +115,7 @@
 			}
 		}]
 	},{
-		"path": "/rest-datasets/gee",
+		"path": "/v1/rest-datasets/gee",
 		"method": "POST",
 		"redirect": {
 			"method": "POST",

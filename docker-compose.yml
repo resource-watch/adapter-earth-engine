@@ -1,5 +1,5 @@
 prod:
-  image: vizzuality/adapter-earth-engine:0.2.0${STAGING}
+  image: vizzuality/adapter-earth-engine:1.0.0${STAGING}
   ports:
     - "5700"
   env_file:
