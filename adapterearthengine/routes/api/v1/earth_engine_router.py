@@ -23,12 +23,12 @@ def query(dataset_id):
     dataset = DatasetResponder().deserialize(request.get_json())
     table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
-    sql = request.args.get('sql', None) # or request.get_json().get('sql', None)
+    sql = request.args.get('sql', None) or request.get_json().get('sql', None)
 
     if sql != None:
         result_query = '?sql='+sql
     else:
-        fs = copy.deepcopy(request.args) # or copy.deepcopy(request.get_json())
+        fs = copy.deepcopy(request.args) or copy.deepcopy(request.get_json())
         if fs.get('dataset'):
             del fs['dataset']
 
@@ -38,7 +38,7 @@ def query(dataset_id):
             result_query += param
 
     # geostore
-    geostore = request.args.get('geostore', None) # or request.get_json().get('geostore', None)
+    geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
     if geostore:
         result_query = result_query+'&geostore='+geostore
 
@@ -85,7 +85,7 @@ def query(dataset_id):
         features = QueryResponder().serialize(response.get('features', {}))
 
     def generate_json():
-        yield '{"cloneUrl": ' + json.dumps(QueryService.get_clone_url(dataset.get('id'))) + ','
+        yield '{"cloneUrl": ' + json.dumps(QueryService.get_clone_url(dataset.get('id'), query)) + ','
         if table_type is 'ft':
             f_len = len(features)
             yield '"data": ['
@@ -147,12 +147,12 @@ def download(dataset_id):
     dataset = DatasetResponder().deserialize(request.get_json())
     table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
-    sql = request.args.get('sql', None) # or request.get_json().get('sql', None)
+    sql = request.args.get('sql', None) or request.get_json().get('sql', None)
 
     if sql:
         result_query = '?sql='+sql
     else:
-        fs = copy.deepcopy(request.args) # or copy.deepcopy(request.get_json())
+        fs = copy.deepcopy(request.args) or copy.deepcopy(request.get_json())
         if fs.get('dataset'):
             del fs['dataset']
 
@@ -162,7 +162,7 @@ def download(dataset_id):
             result_query += param
 
     # geostore
-    geostore = request.args.get('geostore', None) # or request.get_json().get('geostore', None)
+    geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
     if geostore:
         result_query = result_query+'&geostore='+geostore
 

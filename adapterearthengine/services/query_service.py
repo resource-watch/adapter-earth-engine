@@ -80,13 +80,13 @@ def get_type(table_name):
         return 'raster'
 
 
-def get_clone_url(dataset_id):
+def get_clone_url(dataset_id, query):
     return {
         'httpMethod': 'POST',
-        'url': '/dataset/'+dataset_id,
+        'url': '/v1/dataset/'+dataset_id+'/clone',
         'body': {
             'dataset': {
-                'datasetUrl': '/query/'+dataset_id,
+                'datasetUrl': '/query/'+dataset_id+'?sql='+query,
                 'application': [
                     'your',
                     'apps'
