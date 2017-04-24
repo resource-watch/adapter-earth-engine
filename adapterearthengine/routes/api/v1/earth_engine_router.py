@@ -1,13 +1,12 @@
-import os
+
+
 import json
 import csv
 import copy
-import StringIO
 import logging
 
 from flask import jsonify, request, Response, stream_with_context
 from CTRegisterMicroserviceFlask import request_to_microservice
-import requests
 
 from . import endpoints
 from adapterearthengine.responders import ErrorResponder, DatasetResponder, QueryResponder, FieldsResponder
@@ -41,14 +40,15 @@ def query(dataset_id):
     geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
     if geostore:
         result_query = result_query+'&geostore='+geostore
+    geojson = request.args.get('geojson', None) or request.get_json().get('geojson', None)
 
     # convert
     try:
         if sql:
-            query_type='sql'
+            query_type = 'sql'
         else:
-            query_type='fs'
-        query, json_sql = QueryService.convert(result_query, query_type=query_type)
+            query_type = 'fs'
+        query, json_sql = QueryService.convert(result_query, geojson, query_type=query_type)
     except SqlFormatError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 400, 'message': error.message})
@@ -165,14 +165,15 @@ def download(dataset_id):
     geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
     if geostore:
         result_query = result_query+'&geostore='+geostore
+    geojson = request.args.get('geojson', None) or request.get_json().get('geojson', None)
 
     # convert
     try:
         if sql:
-            query_type='sql'
+            query_type = 'sql'
         else:
             query_type='fs'
-        query, json_sql = QueryService.convert(result_query, query_type=query_type)
+        query, json_sql = QueryService.convert(result_query, geojson, query_type=query_type)
     except SqlFormatError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 400, 'message': error.message})
