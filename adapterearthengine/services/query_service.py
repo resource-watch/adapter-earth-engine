@@ -7,8 +7,7 @@ from adapterearthengine.responders import QueryResponder
 from adapterearthengine.errors import SqlFormatError
 
 
-def convert(query, geojson=None, query_type='sql'):
-    """."""
+def convert(query, query_type='sql'):
     if not query:
         raise SqlFormatError(message='sql or fs not provided')
     if query_type == 'fs' and not '&' in query:
@@ -27,11 +26,6 @@ def convert(query, geojson=None, query_type='sql'):
             'uri': '/convert/'+result,
             'method': 'GET'
         }
-        if geojson:
-            config['method'] = 'POST'
-            config['data'] = {
-                'geojson': geojson
-            }
         response = request_to_microservice(config)
     except Exception as error:
         raise error

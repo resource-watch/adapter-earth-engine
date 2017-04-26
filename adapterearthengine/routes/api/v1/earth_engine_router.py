@@ -1,5 +1,3 @@
-
-
 import json
 import csv
 import copy
@@ -24,7 +22,7 @@ def query(dataset_id):
 
     sql = request.args.get('sql', None) or request.get_json().get('sql', None)
 
-    if sql != None:
+    if sql:
         result_query = '?sql='+sql
     else:
         fs = copy.deepcopy(request.args) or copy.deepcopy(request.get_json())
@@ -40,15 +38,14 @@ def query(dataset_id):
     geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
     if geostore:
         result_query = result_query+'&geostore='+geostore
-    geojson = request.args.get('geojson', None) or request.get_json().get('geojson', None)
 
     # convert
     try:
         if sql:
-            query_type = 'sql'
+            query_type='sql'
         else:
-            query_type = 'fs'
-        query, json_sql = QueryService.convert(result_query, geojson, query_type=query_type)
+            query_type='fs'
+        query, json_sql = QueryService.convert(result_query, query_type=query_type)
     except SqlFormatError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 400, 'message': error.message})
@@ -58,12 +55,13 @@ def query(dataset_id):
         return jsonify(response), 500
 
     # geojson
-    geojson = None
-    try:
-        if query.index('ST_INTERSECTS'):
-            geojson = QueryService.get_geojson(json_sql)
-    except:
-        pass
+    geojson = request.get_json().get('geojson', None)
+    if not geojson:
+        try:
+            if query.index('ST_INTERSECTS'):
+                geojson = QueryService.get_geojson(json_sql)
+        except:
+            pass
 
     # query
     try:
@@ -165,15 +163,14 @@ def download(dataset_id):
     geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
     if geostore:
         result_query = result_query+'&geostore='+geostore
-    geojson = request.args.get('geojson', None) or request.get_json().get('geojson', None)
 
     # convert
     try:
         if sql:
-            query_type = 'sql'
+            query_type='sql'
         else:
             query_type='fs'
-        query, json_sql = QueryService.convert(result_query, geojson, query_type=query_type)
+        query, json_sql = QueryService.convert(result_query, query_type=query_type)
     except SqlFormatError as error:
         logging.error(error.message)
         response = ErrorResponder.build({'status': 400, 'message': error.message})
@@ -183,12 +180,13 @@ def download(dataset_id):
         return jsonify(response), 500
 
     # geojson
-    geojson = None
-    try:
-        if query.index('ST_INTERSECTS'):
-            geojson = QueryService.get_geojson(json_sql)
-    except:
-        pass
+    geojson = request.get_json().get('geojson', None)
+    if not geojson:
+        try:
+            if query.index('ST_INTERSECTS'):
+                geojson = QueryService.get_geojson(json_sql)
+        except:
+            pass
 
     # query
     try:
