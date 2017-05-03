@@ -1,13 +1,10 @@
-import os
 import json
 import csv
 import copy
-import StringIO
 import logging
 
 from flask import jsonify, request, Response, stream_with_context
 from CTRegisterMicroserviceFlask import request_to_microservice
-import requests
 
 from . import endpoints
 from adapterearthengine.responders import ErrorResponder, DatasetResponder, QueryResponder, FieldsResponder
@@ -25,7 +22,7 @@ def query(dataset_id):
 
     sql = request.args.get('sql', None) or request.get_json().get('sql', None)
 
-    if sql != None:
+    if sql:
         result_query = '?sql='+sql
     else:
         fs = copy.deepcopy(request.args) or copy.deepcopy(request.get_json())
@@ -58,12 +55,13 @@ def query(dataset_id):
         return jsonify(response), 500
 
     # geojson
-    geojson = None
-    try:
-        if query.index('ST_INTERSECTS'):
-            geojson = QueryService.get_geojson(json_sql)
-    except:
-        pass
+    geojson = request.get_json().get('geojson', None)
+    if not geojson:
+        try:
+            if query.index('ST_INTERSECTS'):
+                geojson = QueryService.get_geojson(json_sql)
+        except:
+            pass
 
     # query
     try:
@@ -182,12 +180,13 @@ def download(dataset_id):
         return jsonify(response), 500
 
     # geojson
-    geojson = None
-    try:
-        if query.index('ST_INTERSECTS'):
-            geojson = QueryService.get_geojson(json_sql)
-    except:
-        pass
+    geojson = request.get_json().get('geojson', None)
+    if not geojson:
+        try:
+            if query.index('ST_INTERSECTS'):
+                geojson = QueryService.get_geojson(json_sql)
+        except:
+            pass
 
     # query
     try:
