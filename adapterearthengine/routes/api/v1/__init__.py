@@ -1,4 +1,1 @@
-from flask import Blueprint
-
-endpoints = Blueprint('endpoints', __name__)
-import earth_engine_router
+from adapterearthengine.routes.api.v1.earth_engine_router import endpoints
