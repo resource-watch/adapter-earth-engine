@@ -3,25 +3,18 @@ import csv
 import copy
 import logging
 
-from flask import jsonify, request, Response, stream_with_context
+from flask import jsonify, request, Response, stream_with_context, Blueprint
 from CTRegisterMicroserviceFlask import request_to_microservice
 
-from . import endpoints
 from adapterearthengine.responders import ErrorResponder, DatasetResponder, QueryResponder, FieldsResponder
 from adapterearthengine.services import EarthEngineService, QueryService
 from adapterearthengine.errors import SqlFormatError, GEEQueryError, GeojsonNotFound
 
-@endpoints.route('/query/<dataset_id>', methods=['POST'])
-def query(dataset_id):
-    """Query GEE Dataset Endpoint"""
-    logging.info('Doing GEE Query')
+endpoints = Blueprint('endpoints', __name__)
 
-    # Get and deserialize
-    dataset = DatasetResponder().deserialize(request.get_json())
-    table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
-    sql = request.args.get('sql', None) or request.get_json().get('sql', None)
-
+def form_query(sql, dataset, request):
+    # sql or fs
     if sql:
         result_query = '?sql='+sql
     else:
@@ -38,6 +31,21 @@ def query(dataset_id):
     geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
     if geostore:
         result_query = result_query+'&geostore='+geostore
+
+    return result_query
+
+@endpoints.route('/query/<dataset_id>', methods=['POST'])
+def query(dataset_id):
+    """Query GEE Dataset Endpoint"""
+    logging.info('Doing GEE Query')
+
+    # Get and deserialize
+    dataset = DatasetResponder().deserialize(request.get_json())
+    table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
+    sql = request.args.get('sql', None) or request.get_json().get('sql', None)
+
+    # request
+    result_query = form_query(sql, dataset, request)
 
     # convert
     try:
@@ -98,9 +106,41 @@ def query(dataset_id):
             yield json.dumps(response)
             yield ']}'
 
-    return Response(stream_with_context(generate_json()),
-        mimetype='application/json',
-    )
+    def generate_geojson():
+        yield '{"cloneUrl": ' + json.dumps(QueryService.get_clone_url(dataset.get('id'), query)) + ','
+        if table_type is 'ft':
+            f_len = len(features)
+            yield '"data": [{ "type": "FeatureCollection", "features": ['
+            for idx, feature in enumerate(features):
+                geo_feature = {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": {}
+                }
+                for prop in feature:
+                    if prop == 'the_geom':
+                        geo_feature['geometry'] = feature['the_geom']
+                    else:
+                        geo_feature['properties'][prop] = feature[prop]
+                if idx != f_len-1:
+                    yield json.dumps(geo_feature) + ','
+                else:
+                    yield json.dumps(geo_feature)
+            yield ']}]}'
+        elif table_type is 'raster':
+            yield '"data": ['
+            yield json.dumps(response)
+            yield ']}'
+
+    format = request.args.get('format', None)
+    if format == 'geojson':
+        return Response(stream_with_context(generate_geojson()),
+            mimetype='application/json',
+        )
+    else:
+        return Response(stream_with_context(generate_json()),
+            mimetype='application/json',
+        )
 
 
 @endpoints.route('/fields/<dataset_id>', methods=['POST'])
@@ -144,25 +184,10 @@ def download(dataset_id):
     # Get and deserialize
     dataset = DatasetResponder().deserialize(request.get_json())
     table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
-
     sql = request.args.get('sql', None) or request.get_json().get('sql', None)
 
-    if sql:
-        result_query = '?sql='+sql
-    else:
-        fs = copy.deepcopy(request.args) or copy.deepcopy(request.get_json())
-        if fs.get('dataset'):
-            del fs['dataset']
-
-        result_query = '?tableName="' + dataset.get('attributes', None).get('tableName') + '"'
-        for key in fs.keys():
-            param = '&' + key + '=' + fs.get(key)
-            result_query += param
-
-    # geostore
-    geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
-    if geostore:
-        result_query = result_query+'&geostore='+geostore
+    # request
+    result_query = form_query(sql, dataset, request)
 
     # convert
     try:
@@ -241,6 +266,7 @@ def download(dataset_id):
                 yield row.read()
 
     def generate_json():
+        yield '{'
         if table_type is 'ft':
             f_len = len(features)
             yield '"data": ['
@@ -260,6 +286,32 @@ def download(dataset_id):
                     yield json.dumps(response[key])
             yield ']}'
 
+    def generate_geojson():
+        yield '{'
+        if table_type is 'ft':
+            f_len = len(features)
+            yield '"data": [{ "type": "FeatureCollection", "features": ['
+            for idx, feature in enumerate(features):
+                geo_feature = {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": {}
+                }
+                for prop in feature:
+                    if prop == 'the_geom':
+                        geo_feature['geometry'] = feature['the_geom']
+                    else:
+                        geo_feature['properties'][prop] = feature[prop]
+                if idx != f_len-1:
+                    yield json.dumps(geo_feature) + ','
+                else:
+                    yield json.dumps(geo_feature)
+            yield ']}]}'
+        elif table_type is 'raster':
+            yield '"data": ['
+            yield json.dumps(response)
+            yield ']}'
+
     format = request.args.get('format', None)
     if format == 'csv':
         return Response(stream_with_context(generate_csv()),
@@ -267,6 +319,14 @@ def download(dataset_id):
             headers={
                 'Content-Disposition': 'attachment; filename=export.csv',
                 'Content-type': 'text/csv'
+            }
+        )
+    elif format == 'geojson':
+        return Response(stream_with_context(generate_geojson()),
+            mimetype='application/json',
+            headers={
+                'Content-Disposition': 'attachment; filename=export.json',
+                'Content-type': 'application/json'
             }
         )
     else:
