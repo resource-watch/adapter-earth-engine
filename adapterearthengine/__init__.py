@@ -41,13 +41,13 @@ app.register_blueprint(endpoints, url_prefix='/api/v1/earthengine')
 info = load_config_json('register')
 swagger = load_config_json('swagger')
 CTRegisterMicroserviceFlask.register(
-    app = app,
-    name = 'adapter-earth-engine',
-    info = info,
-    swagger = swagger,
-    mode = CTRegisterMicroserviceFlask.AUTOREGISTER_MODE if os.getenv('ENVIRONMENT') == 'dev' else CTRegisterMicroserviceFlask.NORMAL_MODE,
-    ct_url = os.getenv('CT_URL'),
-    url = os.getenv('LOCAL_URL')
+    app=app,
+    name='adapter-earth-engine',
+    info=info,
+    swagger=swagger,
+    mode=CTRegisterMicroserviceFlask.AUTOREGISTER_MODE if os.getenv('CT_REGISTER_MODE') and os.getenv('CT_REGISTER_MODE') == 'auto' else CTRegisterMicroserviceFlask.NORMAL_MODE,
+    ct_url=os.getenv('CT_URL'),
+    url=os.getenv('LOCAL_URL')
 )
 
 @app.errorhandler(403)
