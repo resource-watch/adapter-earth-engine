@@ -156,7 +156,10 @@ def fields(dataset_id):
     table_type = QueryService.get_type(dataset.get('attributes').get('tableName'))
 
     if table_type is 'raster':
-        response = FieldsResponder.build({'tableName': table_name, 'fields': []})
+        response = {
+            'tableName': table_name,
+            'fields': {}
+        }
         return jsonify(response), 200
 
     sql = '?sql=SELECT * FROM \"' + table_name + '\" LIMIT 1'
