@@ -2,8 +2,6 @@ develop:
   extends:
     file: base.yml
     service: base
-  ports:
-    - "35733:35730"
   container_name: adapter-earth-engine-develop
   environment:
     CT_REGISTER_MODE: auto
