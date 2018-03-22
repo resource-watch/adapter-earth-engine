@@ -3,4 +3,4 @@ earthengine-api==0.1.102
 CTRegisterMicroserviceFlask==0.4.0
 pycrypto==2.6.1
 requests==2.12.4
-sql2gee==0.2.0
+sql2gee==0.2.3
