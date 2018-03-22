@@ -1,12 +1,12 @@
-FROM python:2.7-alpine
+FROM python:3.6-alpine
 MAINTAINER Sergio Gordillo sergio.gordillo@vizzuality.com
 
-ENV NAME adapter-earth-engine
-ENV USER microservice
+ENV NAME adapterearthengine
+ENV USER adapterearthengine
 
 RUN apk update && apk upgrade && \
    apk add --no-cache --update bash git openssl-dev build-base alpine-sdk \
-   libffi-dev
+   libffi-dev postgresql-dev gcc python3-dev musl-dev
 
 RUN addgroup $USER && adduser -s /bin/bash -D -G $USER $USER
 

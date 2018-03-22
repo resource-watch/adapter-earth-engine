@@ -3,7 +3,6 @@ import re
 
 from CTRegisterMicroserviceFlask import request_to_microservice
 
-from adapterearthengine.responders import QueryResponder
 from adapterearthengine.errors import SqlFormatError
 
 
@@ -27,18 +26,13 @@ def convert(query, query_type='sql'):
             'method': 'GET'
         }
         response = request_to_microservice(config)
+        return response.get('data').get('attributes').get('jsonSql')
     except Exception as error:
         raise error
 
     if response.get('errors'):
         errors = response.get('errors')
         raise SqlFormatError(message=errors[0].get('detail'))
-
-    query = QueryResponder().deserialize(response)
-    s_query = query.get('attributes', {}).get('query')
-    json_sql = query.get('attributes', {}).get('jsonSql')
-
-    return s_query, json_sql
 
 
 def quote_table(query, type='sql'):

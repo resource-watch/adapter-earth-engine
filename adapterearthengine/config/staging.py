@@ -1,5 +1,5 @@
 
-settings={
+SETTINGS = {
     'logging': {
         'level': 'INFO'
     }
