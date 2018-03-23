@@ -65,7 +65,7 @@ def query(dataset_id):
 
     # @TODO
     meta = {}
-    return jsonify(data=serialize_query(response, meta)), 200
+    return jsonify(serialize_query(response, meta)), 200
 
 
 @earth_engine_endpoints.route('/fields/<dataset_id>', methods=['POST'])
