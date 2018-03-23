@@ -1,6 +1,6 @@
 from adapterearthengine.utils.files import BASE_DIR
 
-settings={
+SETTINGS = {
     'logging': {
         'level': 'DEBUG'
     },

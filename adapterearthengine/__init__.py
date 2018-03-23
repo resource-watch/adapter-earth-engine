@@ -5,24 +5,25 @@ import ee
 from oauth2client.service_account import ServiceAccountCredentials
 
 from flask import Flask
-from adapterearthengine.config import settings
-from adapterearthengine.routes.api.v1 import endpoints
+from adapterearthengine.config import SETTINGS
+from adapterearthengine.routes.api import error
+from adapterearthengine.routes.api.v1 import earth_engine_endpoints
 from adapterearthengine.utils.files import load_config_json
 import CTRegisterMicroserviceFlask
 
 # Logging
 logging.basicConfig(
-    level = settings.get('logging', {}).get('level'),
-    format = '[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s',
-    datefmt = '%Y%m%d-%H:%M%p',
+    level=SETTINGS.get('logging', {}).get('level'),
+    format='[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s',
+    datefmt='%Y%m%d-%H:%M%p',
 )
 
 # Initializing GEE
-gee = settings.get('gee')
+gee = SETTINGS.get('gee')
 gee_credentials = ServiceAccountCredentials.from_p12_keyfile(
     gee.get('service_account'),
     gee.get('privatekey_file'),
-    scopes = ee.oauth.SCOPE
+    scopes=ee.oauth.SCOPE
 )
 
 ee.Initialize(gee_credentials)
@@ -32,10 +33,10 @@ ee.data.setDeadline(60000)
 app = Flask(__name__)
 
 # Config
-app.config.from_object(settings)
+app.config.from_object(SETTINGS)
 
 # Routing
-app.register_blueprint(endpoints, url_prefix='/api/v1/earthengine')
+app.register_blueprint(earth_engine_endpoints, url_prefix='/api/v1/earthengine')
 
 # CT
 info = load_config_json('register')
