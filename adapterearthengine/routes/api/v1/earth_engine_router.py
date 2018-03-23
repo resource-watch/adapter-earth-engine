@@ -33,7 +33,7 @@ def build_query(rq):
 
 
 @earth_engine_endpoints.route('/query/<dataset_id>', methods=['POST'])
-def query():
+def query(dataset_id):
     """Query GEE Dataset Endpoint"""
     logging.info('Doing GEE Query')
 
@@ -46,6 +46,7 @@ def query():
         else:
             query_type = 'fs'
         json_sql = QueryService.convert(result_query, query_type=query_type)
+        
     except SqlFormatError as e:
         logging.error('[ROUTER]: '+e.message)
         return error(status=400, detail=e.message)
@@ -68,7 +69,7 @@ def query():
 
 
 @earth_engine_endpoints.route('/fields/<dataset_id>', methods=['POST'])
-def fields():
+def fields(dataset_id):
     """Get GEE Dataset Fields Endpoint"""
     logging.info('Getting fields of a GEE Dataset')
 
@@ -80,7 +81,7 @@ def fields():
     json_sql = QueryService.convert(sql, query_type='sql')
 
     try:
-        response = EarthEngineService.execute_query(json_sql).metadata()
+        response = EarthEngineService.execute_query(json_sql).metadata
     except GEEQueryError as e:
         logging.error('[ROUTER]: '+e.message)
         return error(status=400, detail=e.message)
@@ -139,7 +140,7 @@ def register_dataset():
     json_sql = QueryService.convert(sql, query_type='sql')
 
     try:
-        response = EarthEngineService.execute_query(json_sql).metadata()
+        response = EarthEngineService.execute_query(json_sql).metadata
         status = 1
     except GEEQueryError as e:
         logging.error('[ROUTER]: '+e.message)

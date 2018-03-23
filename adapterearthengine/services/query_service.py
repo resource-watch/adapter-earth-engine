@@ -26,7 +26,7 @@ def convert(query, query_type='sql'):
             'method': 'GET'
         }
         response = request_to_microservice(config)
-        return response.get('data').get('attributes').get('jsonSql')
+        return response
     except Exception as error:
         raise error
 
