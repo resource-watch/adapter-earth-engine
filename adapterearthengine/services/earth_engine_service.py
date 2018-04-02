@@ -4,13 +4,10 @@ from adapterearthengine.errors import GEEQueryError
 from sql2gee import SQL2GEE
 
 
-def execute_query(query, geojson=None):
-    logging.info('Executing Query: '+query)
-
+def execute_query(json_sql, geojson=None, flags=None):
+    logging.info('Executing Query')
+    logging.info(json_sql)
     try:
-        q = SQL2GEE(sql=query, geojson=geojson, flags=None)
-        response = q.response
+        return SQL2GEE(json_sql, geojson=geojson, flags=None)
     except Exception as error:
-        raise GEEQueryError(error)
-
-    return response
+        raise GEEQueryError(str(error))

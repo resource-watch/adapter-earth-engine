@@ -1,1 +1,1 @@
-from adapterearthengine.routes.api.v1.earth_engine_router import endpoints
+from adapterearthengine.routes.api.v1.earth_engine_router import earth_engine_endpoints

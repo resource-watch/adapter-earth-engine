@@ -1,11 +1,11 @@
 import os
 from . import base, staging, prod
 
-settings = base.settings
+SETTINGS = base.SETTINGS
 
 if os.getenv('ENVIRONMENT') == 'staging':
-    settings.update(staging.settings)
+    SETTINGS.update(staging.SETTINGS)
 
 
 if os.getenv('ENVIRONMENT') == 'prod':
-    settings.update(prod.settings)
+    SETTINGS.update(prod.SETTINGS)
