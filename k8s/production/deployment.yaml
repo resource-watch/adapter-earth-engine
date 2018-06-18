@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     name: {name}
+    app: rw
   name: {name}
 spec:
   revisionHistoryLimit: 2
