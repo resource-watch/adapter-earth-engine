@@ -19,7 +19,7 @@ def convert(query, query_type='sql'):
         endpoint = 'fs2SQL'
 
     result = endpoint+query
-    logging.info(result)
+    logging.info(f'[QUERY SERVICE - convert]: {result}')
 
     try:
         config = {

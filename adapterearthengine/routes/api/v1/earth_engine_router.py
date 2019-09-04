@@ -17,7 +17,7 @@ earth_engine_endpoints = Blueprint('endpoints', __name__)
 def build_query(rq):
     dataset = rq.get_json().get('dataset').get('data')
     sql = rq.args.get('sql', None) or rq.get_json().get('sql', None)
-    logging.debug(f'[ROUTER build_query]: {str(rq.args)}')
+    logging.info(f'[ROUTER build_query]: {str(rq.args)}')
     # sql or fs
     if sql:
         test = copy.deepcopy(rq.args).to_dict() or copy.deepcopy(rq.get_json()).to_dict()
