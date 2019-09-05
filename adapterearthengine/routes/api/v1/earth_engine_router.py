@@ -17,11 +17,14 @@ earth_engine_endpoints = Blueprint('endpoints', __name__)
 def build_query(rq):
     dataset = rq.get_json().get('dataset').get('data')
     sql = rq.args.get('sql', None) or rq.get_json().get('sql', None)
+    logging.info(f'[ROUTER build_query]: {str(rq.args)}')
     # sql or fs
     if sql:
-        result_query = '?sql='+sql
+        test = copy.deepcopy(rq.args).to_dict() or copy.deepcopy(rq.get_json()).to_dict()
+        result_query = f'?sql={sql}'
     else:
         fs = copy.deepcopy(rq.args) or copy.deepcopy(rq.get_json())
+
         if fs.get('dataset'):
             del fs['dataset']
 
@@ -36,8 +39,8 @@ def build_query(rq):
 def query(dataset_id):
     """Query GEE Dataset Endpoint"""
     logging.info('Doing GEE Query')
-
     sql = request.args.get('sql', None) or request.get_json().get('sql', None)
+    geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
     result_query = build_query(request)
 
     try:
@@ -55,7 +58,11 @@ def query(dataset_id):
         return error(status=500, detail='Generic Error')
 
     try:
-        response = EarthEngineService.execute_query(json_sql).response()
+        if geostore:
+            geojson = QueryService.get_geojson(geostore)
+        else:
+            geojson = None
+        response = EarthEngineService.execute_query(json_sql, geojson).response()
     except GEEQueryError as e:
         logging.error('[ROUTER] /query/<dataset_id> - GEE Query error in GEE query execution: '+e.message)
         return error(status=400, detail=e.message)
