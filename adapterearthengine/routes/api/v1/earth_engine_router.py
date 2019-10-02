@@ -1,15 +1,14 @@
-import json
-import csv
 import copy
 import logging
 
-from flask import jsonify, request, Response, stream_with_context, Blueprint
 from CTRegisterMicroserviceFlask import request_to_microservice
+from flask import jsonify, request, Blueprint
 
+from adapterearthengine.errors import SqlFormatError, GEEQueryError
+from adapterearthengine.middleware import is_microservice_or_admin
 from adapterearthengine.routes.api import error
-from adapterearthengine.services import EarthEngineService, QueryService
-from adapterearthengine.errors import SqlFormatError, GEEQueryError, GeojsonNotFound
 from adapterearthengine.serializers import serialize_query, serialize_fields
+from adapterearthengine.services import EarthEngineService, QueryService
 
 earth_engine_endpoints = Blueprint('endpoints', __name__)
 
@@ -35,6 +34,14 @@ def build_query(rq):
     return result_query
 
 
+@earth_engine_endpoints.route('/rest-datasets/gee/<dataset_id>', methods=['DELETE'])
+@is_microservice_or_admin
+def delete(dataset_id):
+    """Delete GEE Dataset"""
+    logging.info('Deleting GEE dataset {}'.format(dataset_id))
+    return b'', 204
+
+
 @earth_engine_endpoints.route('/query/<dataset_id>', methods=['POST'])
 def query(dataset_id):
     """Query GEE Dataset Endpoint"""
@@ -49,12 +56,12 @@ def query(dataset_id):
         else:
             query_type = 'fs'
         json_sql = QueryService.convert(result_query, query_type=query_type)
-        
+
     except SqlFormatError as e:
-        logging.error('[ROUTER] /query/<dataset_id> - SQL Format error in query conversion: '+e.message)
+        logging.error('[ROUTER] /query/<dataset_id> - SQL Format error in query conversion: ' + e.message)
         return error(status=400, detail=e.message)
     except Exception as e:
-        logging.error('[ROUTER] /query/<dataset_id> - Generic error in query conversion: '+str(e))
+        logging.error('[ROUTER] /query/<dataset_id> - Generic error in query conversion: ' + str(e))
         return error(status=500, detail='Generic Error')
 
     try:
@@ -64,10 +71,10 @@ def query(dataset_id):
             geojson = None
         response = EarthEngineService.execute_query(json_sql, geojson).response()
     except GEEQueryError as e:
-        logging.error('[ROUTER] /query/<dataset_id> - GEE Query error in GEE query execution: '+e.message)
+        logging.error('[ROUTER] /query/<dataset_id> - GEE Query error in GEE query execution: ' + e.message)
         return error(status=400, detail=e.message)
     except Exception as e:
-        logging.error('[ROUTER] /query/<dataset_id> - Generic error in GEE query execution: '+str(e))
+        logging.error('[ROUTER] /query/<dataset_id> - Generic error in GEE query execution: ' + str(e))
         return error(status=500, detail='Generic Error')
 
     # @TODO
@@ -90,10 +97,10 @@ def fields(dataset_id):
     try:
         response = EarthEngineService.execute_query(json_sql).metadata
     except GEEQueryError as e:
-        logging.error('[ROUTER] /fields/<dataset_id> - GEE Query error in GEE query execution: '+e.message)
+        logging.error('[ROUTER] /fields/<dataset_id> - GEE Query error in GEE query execution: ' + e.message)
         return error(status=400, detail=e.message)
     except Exception as e:
-        logging.error('[ROUTER] /fields/<dataset_id> - Generic error in GEE query execution: '+str(e))
+        logging.error('[ROUTER] /fields/<dataset_id> - Generic error in GEE query execution: ' + str(e))
         return error(status=500, detail='Generic Error')
 
     return jsonify(data=serialize_fields(response, table_name)), 200
@@ -114,19 +121,19 @@ def download(dataset_id):
             query_type = 'fs'
         json_sql = QueryService.convert(result_query, query_type=query_type)
     except SqlFormatError as e:
-        logging.error('[ROUTER] /download/<dataset_id> - SQL Format error in query conversion: '+e.message)
+        logging.error('[ROUTER] /download/<dataset_id> - SQL Format error in query conversion: ' + e.message)
         return error(status=400, detail=e.message)
     except Exception as e:
-        logging.error('[ROUTER] /download/<dataset_id> - Generic error in query conversion: '+str(e))
+        logging.error('[ROUTER] /download/<dataset_id> - Generic error in query conversion: ' + str(e))
         return error(status=500, detail='Generic Error')
 
     try:
         response = EarthEngineService.execute_query(json_sql).response()
     except GEEQueryError as e:
-        logging.error('[ROUTER] /download/<dataset_id> - GEE Query error in GEE query execution: '+e.message)
+        logging.error('[ROUTER] /download/<dataset_id> - GEE Query error in GEE query execution: ' + e.message)
         return error(status=400, detail=e.message)
     except Exception as e:
-        logging.error('[ROUTER] /download/<dataset_id> - Generic error in GEE query execution: '+str(e))
+        logging.error('[ROUTER] /download/<dataset_id> - Generic error in GEE query execution: ' + str(e))
         return error(status=500, detail='Generic Error')
 
     # @TODO
@@ -150,14 +157,14 @@ def register_dataset():
         response = EarthEngineService.execute_query(json_sql).metadata
         status = 1
     except GEEQueryError as e:
-        logging.error('[ROUTER] /rest-datasets/gee - GEE Query error in GEE query execution: '+e.message)
+        logging.error('[ROUTER] /rest-datasets/gee - GEE Query error in GEE query execution: ' + e.message)
         status = 2
     except Exception as e:
-        logging.error('[ROUTER] /rest-datasets/gee - Generic error in GEE query execution: '+str(e))
+        logging.error('[ROUTER] /rest-datasets/gee - Generic error in GEE query execution: ' + str(e))
         status = 2
 
     config = {
-        'uri': '/dataset/'+request.get_json().get('connector').get('id'),
+        'uri': '/dataset/' + request.get_json().get('connector').get('id'),
         'method': 'PATCH',
         'body': {'status': status}
     }

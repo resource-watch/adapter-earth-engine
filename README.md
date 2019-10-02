@@ -87,3 +87,14 @@ Example (copy&paste)
 ```
 GET: https://staging-api.globalforestwatch.org/download/68353d61-0f47-4836-9699-72e008cd9f5f?sql=select * from ft:1qpKIcYQMBsXLA9RLWCaV9D0Hus2cMQHhI-ViKHo where width > 100
 ```
+
+
+## Tests
+
+As this microservice relies on Google Earth Engine, tests require a valid `storage.json` or equivalent file. 
+At the time of this writing, actual tests use mock calls, so the real credential are only needed because Google's 
+library actually validates the credentials on startup. 
+
+Before you run the tests, be sure to install the necessary development libraries, using `pip install -r requirements_dev.txt`.
+
+Actual test execution is done by running the `pytest` executable on the root of the project.  
