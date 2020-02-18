@@ -2,8 +2,8 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    name: {name}
-  name: {name}
+    name: gee
+  name: gee
 spec:
   revisionHistoryLimit: 0
   template:
@@ -11,16 +11,19 @@ spec:
       annotations:
         chaos.alpha.kubernetes.io/enabled: "true"
       labels:
-        name: {name}
+        name: gee
     spec:
       containers:
-      - name: {name}
-        image: vizzuality/{name}
+      - name: gee
+        image: vizzuality/gee
         imagePullPolicy: Always
         resources:
           requests:
-            memory: "0Mi"
-            cpu: "0m"
+            cpu: "0.5"
+            memory: "256M"
+          limits:
+            cpu: "1"
+            memory: "512M"
         args:
           - start
         env:
@@ -29,7 +32,7 @@ spec:
           - name: ENVIRONMENT
             value: staging
           - name: LOCAL_URL
-            value: http://{name}.default.svc.cluster.local:5700
+            value: http://gee.default.svc.cluster.local:5700
           - name: CT_URL
             valueFrom:
                 secretKeyRef:
