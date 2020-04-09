@@ -8,58 +8,65 @@ spec:
   revisionHistoryLimit: 0
   template:
     metadata:
-      annotations:
-        chaos.alpha.kubernetes.io/enabled: "true"
       labels:
         name: gee
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: type
+                    operator: In
+                    values:
+                      - apps
       containers:
-      - name: gee
-        image: vizzuality/gee
-        imagePullPolicy: Always
-        resources:
-          requests:
-            cpu: "0.5"
-            memory: "256M"
-          limits:
-            cpu: "1"
-            memory: "512M"
-        args:
-          - start
-        env:
-          - name: PORT
-            value: "5700"
-          - name: ENVIRONMENT
-            value: staging
-          - name: LOCAL_URL
-            value: http://gee.default.svc.cluster.local:5700
-          - name: CT_URL
-            valueFrom:
+        - name: gee
+          image: vizzuality/gee
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "0.5"
+              memory: "256M"
+            limits:
+              cpu: "1"
+              memory: "512M"
+          args:
+            - start
+          env:
+            - name: PORT
+              value: "5700"
+            - name: ENVIRONMENT
+              value: staging
+            - name: LOCAL_URL
+              value: http://gee.default.svc.cluster.local:5700
+            - name: CT_URL
+              valueFrom:
                 secretKeyRef:
                   name: mssecrets
                   key: CT_URL
-          - name: CT_TOKEN
-            valueFrom:
+            - name: CT_TOKEN
+              valueFrom:
                 secretKeyRef:
                   name: mssecrets
                   key: CT_TOKEN
-          - name: CT_REGISTER_MODE
-            valueFrom:
+            - name: CT_REGISTER_MODE
+              valueFrom:
                 secretKeyRef:
                   name: mssecrets
                   key: CT_REGISTER_MODE
-          - name: API_VERSION
-            valueFrom:
+            - name: API_VERSION
+              valueFrom:
                 secretKeyRef:
                   name: mssecrets
                   key: API_VERSION
-          - name: EE_PRIVATE_KEY
-            valueFrom:
+            - name: EE_PRIVATE_KEY
+              valueFrom:
                 secretKeyRef:
                   name: mssecrets
                   key: EE_PRIVATE_KEY
 
-        ports:
-          - containerPort: 5700
+          ports:
+            - containerPort: 5700
 
       restartPolicy: Always
