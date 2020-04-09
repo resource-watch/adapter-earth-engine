@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {name}
+  name: gee
   namespace: default
 spec:
   scaleTargetRef:
     apiVersion: apps/v1beta1
     kind: Deployment
-    name: {name}
+    name: gee
   minReplicas: 2
   maxReplicas: 4
   targetCPUUtilizationPercentage: 50
