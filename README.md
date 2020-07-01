@@ -6,6 +6,12 @@ If you are looking for the API Doc (Info and Usage) please go to the next link:
 [View the documentation for this
 API] ()(NOT YET)
 
+## Dependencies
+
+Dependencies on other Microservices:
+- [Geostore](https://github.com/gfw-api/gfw-geostore-api)
+- [GFW OGR](https://github.com/gfw-api/gfw-ogr-api)
+
 ## Quick Overview
 
 ### Create a GEE Dataset
