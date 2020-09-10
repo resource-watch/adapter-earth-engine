@@ -1,11 +1,20 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     name: gee
   name: gee
 spec:
+  progressDeadlineSeconds: 2147483647
   revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      name: gee
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -21,17 +30,7 @@ spec:
                     values:
                       - apps
       containers:
-        - name: gee
-          image: vizzuality/gee
-          imagePullPolicy: Always
-          resources:
-            requests:
-              cpu: "0.25"
-              memory: "256M"
-            limits:
-              cpu: "1"
-              memory: "512M"
-          args:
+        - args:
             - start
           env:
             - name: PORT
@@ -43,30 +42,45 @@ spec:
             - name: CT_URL
               valueFrom:
                 secretKeyRef:
-                  name: mssecrets
                   key: CT_URL
+                  name: mssecrets
             - name: CT_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: mssecrets
                   key: CT_TOKEN
+                  name: mssecrets
             - name: CT_REGISTER_MODE
               valueFrom:
                 secretKeyRef:
-                  name: mssecrets
                   key: CT_REGISTER_MODE
+                  name: mssecrets
             - name: API_VERSION
               valueFrom:
                 secretKeyRef:
-                  name: mssecrets
                   key: API_VERSION
+                  name: mssecrets
             - name: EE_PRIVATE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: mssecrets
                   key: EE_PRIVATE_KEY
-
+                  name: mssecrets
+          image: vizzuality/gee
+          imagePullPolicy: Always
+          name: gee
           ports:
             - containerPort: 5700
-
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512M
+            requests:
+              cpu: 250m
+              memory: 256M
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
       restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: { }
+      terminationGracePeriodSeconds: 30
