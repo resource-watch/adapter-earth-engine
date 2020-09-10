@@ -4,17 +4,6 @@ node {
 
   // Actions
   def forceCompleteDeploy = false
-  try {
-    timeout(time: 15, unit: 'SECONDS') {
-      forceCompleteDeploy = input(
-        id: 'Proceed0', message: 'Force COMPLETE Deployment', parameters: [
-        [$class: 'BooleanParameterDefinition', defaultValue: true, description: '', name: 'Please confirm you want to recreate services and deployments']
-      ])
-    }
-  }
-  catch(err) { // timeout reached or input false
-      // nothing
-  }
 
   // Variables
   def tokens = "${env.JOB_NAME}".tokenize('/')
@@ -52,20 +41,26 @@ node {
     stage ("Deploy Application") {
       switch ("${env.BRANCH_NAME}") {
 
+        // Roll out to dev
+        case "dev":
+          sh("echo Deploying to DEV cluster")
+          sh("kubectl config use-context ${KUBECTL_CONTEXT_PREFIX}_${CLOUD_PROJECT_NAME}_${CLOUD_PROJECT_ZONE}_${KUBE_DEV_CLUSTER}")
+          sh("kubectl apply -f k8s/services/")
+          sh("kubectl apply -f k8s/dev/")
+          sh("kubectl set image deployment ${appName} ${appName}=${imageTag} --record")
+          break
+
         // Roll out to staging
-        case "develop":
+        case "staging":
           sh("echo Deploying to STAGING cluster")
           sh("kubectl config use-context ${KUBECTL_CONTEXT_PREFIX}_${CLOUD_PROJECT_NAME}_${CLOUD_PROJECT_ZONE}_${KUBE_STAGING_CLUSTER}")
-          def service = sh([returnStdout: true, script: "kubectl get deploy ${appName} || echo NotFound"]).trim()
-          if ((service && service.indexOf("NotFound") > -1) || (forceCompleteDeploy)){
-            sh("kubectl apply -f k8s/services/")
-            sh("kubectl apply -f k8s/staging/")
-          }
+          sh("kubectl apply -f k8s/services/")
+          sh("kubectl apply -f k8s/staging/")
           sh("kubectl set image deployment ${appName} ${appName}=${imageTag} --record")
           break
 
         // Roll out to production
-        case "master":
+        case "production":
           def userInput = true
           def didTimeout = false
           try {
@@ -87,11 +82,8 @@ node {
           if (userInput == true && !didTimeout){
             sh("echo Deploying to PROD cluster")
             sh("kubectl config use-context ${KUBECTL_CONTEXT_PREFIX}_${CLOUD_PROJECT_NAME}_${CLOUD_PROJECT_ZONE}_${KUBE_PROD_CLUSTER}")
-            def service = sh([returnStdout: true, script: "kubectl get deploy ${appName} || echo NotFound"]).trim()
-            if ((service && service.indexOf("NotFound") > -1) || (forceCompleteDeploy)){
-              sh("kubectl apply -f k8s/services/")
-              sh("kubectl apply -f k8s/production/")
-            }
+            sh("kubectl apply -f k8s/services/")
+            sh("kubectl apply -f k8s/production/")
             sh("kubectl set image deployment ${appName} ${appName}=${imageTag} --record")
           } else {
             sh("echo NOT DEPLOYED")
