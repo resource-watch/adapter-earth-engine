@@ -2,9 +2,6 @@
 
 node {
 
-  // Actions
-  def forceCompleteDeploy = false
-
   // Variables
   def tokens = "${env.JOB_NAME}".tokenize('/')
   def appName = tokens[0]
