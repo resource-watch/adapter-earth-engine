@@ -91,4 +91,6 @@ ENV/
 
 # nohup files
 nohup.out
+
 /privatekey.pem
+/privatekey.json
