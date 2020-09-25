@@ -5,7 +5,7 @@ from CTRegisterMicroserviceFlask import request_to_microservice
 from flask import jsonify, request, Blueprint
 
 from adapterearthengine.errors import SqlFormatError, GEEQueryError
-from adapterearthengine.middleware import is_microservice_or_admin
+from adapterearthengine.middleware import is_microservice_or_admin, get_dataset_from_id
 from adapterearthengine.routes.api import error
 from adapterearthengine.serializers import serialize_query, serialize_fields
 from adapterearthengine.services import EarthEngineService, QueryService
@@ -13,21 +13,22 @@ from adapterearthengine.services import EarthEngineService, QueryService
 earth_engine_endpoints = Blueprint('endpoints', __name__)
 
 
-def build_query(rq):
-    dataset = rq.get_json().get('dataset').get('data')
-    sql = rq.args.get('sql', None) or rq.get_json().get('sql', None)
-    logging.info(f'[ROUTER build_query]: {str(rq.args)}')
+def build_query(request, dataset):
+    request_json = request.get_json() or {}
+
+    sql = request.args.get('sql', None) or request_json.get('sql', None)
+    logging.info(f'[ROUTER build_query]: {str(request.args)}')
     # sql or fs
     if sql:
-        test = copy.deepcopy(rq.args).to_dict() or copy.deepcopy(rq.get_json()).to_dict()
+        test = copy.deepcopy(request.args).to_dict() or copy.deepcopy(request_json).to_dict()
         result_query = f'?sql={sql}'
     else:
-        fs = copy.deepcopy(rq.args) or copy.deepcopy(rq.get_json())
+        fs = copy.deepcopy(request.args) or copy.deepcopy(request_json)
 
         if fs.get('dataset'):
             del fs['dataset']
 
-        result_query = '?tableName="' + dataset.get('attributes', None).get('tableName') + '"'
+        result_query = '?tableName="' + dataset.get('tableName') + '"'
         for key in fs.keys():
             param = '&' + key + '=' + fs.get(key)
             result_query += param
@@ -43,12 +44,16 @@ def delete(dataset_id):
 
 
 @earth_engine_endpoints.route('/query/<dataset_id>', methods=['POST'])
-def query(dataset_id):
+@get_dataset_from_id
+def query(dataset_id, dataset):
     """Query GEE Dataset Endpoint"""
     logging.info('Doing GEE Query')
-    sql = request.args.get('sql', None) or request.get_json().get('sql', None)
-    geostore = request.args.get('geostore', None) or request.get_json().get('geostore', None)
-    result_query = build_query(request)
+
+    request_json = request.get_json() or {}
+
+    sql = request.args.get('sql', None) or request_json.get('sql', None)
+    geostore = request.args.get('geostore', None) or request_json.get('geostore', None)
+    result_query = build_query(request, dataset)
 
     try:
         if sql:
@@ -83,12 +88,12 @@ def query(dataset_id):
 
 
 @earth_engine_endpoints.route('/fields/<dataset_id>', methods=['POST'])
-def fields(dataset_id):
+@get_dataset_from_id
+def fields(dataset_id, dataset):
     """Get GEE Dataset Fields Endpoint"""
     logging.info('Getting fields of a GEE Dataset')
 
-    dataset = request.get_json().get('dataset').get('data')
-    table_name = dataset.get('attributes').get('tableName')
+    table_name = dataset.get('tableName')
     sql = '?sql=SELECT * FROM \"' + table_name + '\" LIMIT 1'
 
     # Convert query
@@ -107,12 +112,15 @@ def fields(dataset_id):
 
 
 @earth_engine_endpoints.route('/download/<dataset_id>', methods=['POST'])
-def download(dataset_id):
+@get_dataset_from_id
+def download(dataset_id, dataset):
     """Download GEE Dataset Endpoint"""
     logging.info('Downloading GEE Dataset')
 
-    sql = request.args.get('sql', None) or request.get_json().get('sql', None)
-    result_query = build_query(request)
+    request_json = request.get_json() or {}
+
+    sql = request.args.get('sql', None) or request_json.get('sql', None)
+    result_query = build_query(request, dataset)
 
     try:
         if sql:
