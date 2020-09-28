@@ -1,5 +1,3 @@
-
-
 class Error(Exception):
 
     def __init__(self, message):
@@ -15,4 +13,8 @@ class GEEQueryError(Error):
 
 
 class GeojsonNotFound(Error):
+    pass
+
+
+class DatasetNotFound(Error):
     pass

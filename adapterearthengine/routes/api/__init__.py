@@ -4,7 +4,6 @@ from __future__ import print_function
 
 from flask import jsonify
 
-# GENERIC Error
 
 def error(status=500, detail='Generic Error'):
     error = {

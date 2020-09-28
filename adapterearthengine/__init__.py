@@ -1,15 +1,14 @@
-import os
-import json
 import logging
-import ee
-from oauth2client.service_account import ServiceAccountCredentials
+import os
 
+import CTRegisterMicroserviceFlask
+import ee
 from flask import Flask
+
 from adapterearthengine.config import SETTINGS
 from adapterearthengine.routes.api import error
 from adapterearthengine.routes.api.v1 import earth_engine_endpoints
 from adapterearthengine.utils.files import load_config_json
-import CTRegisterMicroserviceFlask
 
 # Logging
 logging.basicConfig(
@@ -18,13 +17,10 @@ logging.basicConfig(
     datefmt='%Y%m%d-%H:%M%p',
 )
 
-# Initializing GEE
-gee = SETTINGS.get('gee')
-gee_credentials = ServiceAccountCredentials.from_p12_keyfile(
-    gee.get('service_account'),
-    gee.get('privatekey_file'),
-    scopes=ee.oauth.SCOPE
-)
+EE_ACCOUNT = os.environ['EE_ACCOUNT']
+EE_PRIVATE_KEY_FILE = 'privatekey.json'
+
+gee_credentials = ee.ServiceAccountCredentials(EE_ACCOUNT, EE_PRIVATE_KEY_FILE)
 
 ee.Initialize(gee_credentials)
 ee.data.setDeadline(60000)
@@ -46,10 +42,12 @@ CTRegisterMicroserviceFlask.register(
     name='adapter-earth-engine',
     info=info,
     swagger=swagger,
-    mode=CTRegisterMicroserviceFlask.AUTOREGISTER_MODE if os.getenv('CT_REGISTER_MODE') and os.getenv('CT_REGISTER_MODE') == 'auto' else CTRegisterMicroserviceFlask.NORMAL_MODE,
+    mode=CTRegisterMicroserviceFlask.AUTOREGISTER_MODE if os.getenv('CT_REGISTER_MODE') and os.getenv(
+        'CT_REGISTER_MODE') == 'auto' else CTRegisterMicroserviceFlask.NORMAL_MODE,
     ct_url=os.getenv('CT_URL'),
     url=os.getenv('LOCAL_URL')
 )
+
 
 @app.errorhandler(403)
 def forbidden(e):

@@ -11,6 +11,7 @@ develop:
     ENVIRONMENT: dev
     DEBUG: "True"
     EE_PRIVATE_KEY: ${EE_PRIVATE_KEY}
+    EE_ACCOUNT: ${EE_ACCOUNT}
     API_VERSION: v1
   command: develop
   volumes:
