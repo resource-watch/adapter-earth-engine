@@ -1,8 +1,11 @@
-test:
-  extends:
-    file: base.yml
-    service: base
-  container_name: adapter-earth-engine-test
-  environment:
-    DEBUG: "True"
-  command: test
+version: "3"
+services:
+  test:
+    build: .
+    ports:
+      - "5700:5700"
+    container_name: adapter-earth-engine-test
+    environment:
+      DEBUG: "True"
+      PORT: 5700
+    command: test
