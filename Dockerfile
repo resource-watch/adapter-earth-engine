@@ -1,5 +1,5 @@
 FROM python:3.6-alpine
-MAINTAINER Sergio Gordillo sergio.gordillo@vizzuality.com
+MAINTAINER Vizzuality info@vizzuality.com
 
 ENV NAME adapterearthengine
 ENV USER adapterearthengine
@@ -27,7 +27,7 @@ WORKDIR /opt/$NAME
 
 COPY ./adapterearthengine /opt/$NAME/adapterearthengine
 COPY ./microservice /opt/$NAME/microservice
-COPY ./tests /opt/$NAME/tests
+COPY tests /opt/$NAME/tests
 RUN chown $USER:$USER /opt/$NAME
 
 # Tell Docker we are going to use this ports
