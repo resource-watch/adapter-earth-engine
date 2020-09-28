@@ -11,7 +11,7 @@ RUN apk update && apk upgrade && \
 RUN addgroup $USER && adduser -s /bin/bash -D -G $USER $USER
 
 RUN easy_install pip && pip install --upgrade pip
-RUN pip install virtualenv gunicorn gevent
+RUN pip install virtualenv gunicorn gevent --use-feature=2020-resolver
 
 RUN mkdir -p /opt/$NAME
 RUN cd /opt/$NAME && virtualenv venv && source venv/bin/activate
