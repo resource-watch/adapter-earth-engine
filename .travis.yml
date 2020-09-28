@@ -19,6 +19,7 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 script:
+  - echo -e "$EE_PRIVATE_KEY" | base64 -d > privatekey.json
   - pytest --cov=adapterearthengine --cov-report=xml
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
