@@ -13,6 +13,9 @@ node {
   checkout scm
   properties([pipelineTriggers([[$class: 'GitHubPushTrigger']])])
 
+  // env vars with build-arg
+  def gee_account_credentials = "-e EE_ACCOUNT=${EE_ACCOUNT} -e EE_PRIVATE_KEY=${EE_PRIVATE_KEY}"
+
   try {
 
     stage ('Build docker') {
@@ -22,7 +25,7 @@ node {
 
     stage ('Run Tests') {
       sh('docker-compose -H :2375 -f docker-compose-test.yml build')
-      sh('docker-compose -H :2375 -f docker-compose-test.yml run --rm test')
+      sh('docker-compose -H :2375 -f docker-compose-test.yml run ${gee_account_credentials} --rm test')
       sh('docker-compose -H :2375 -f docker-compose-test.yml stop')
     }
 
