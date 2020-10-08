@@ -1,4 +1,5 @@
 import pytest
+import os
 import requests_mock
 
 import adapterearthengine
@@ -15,7 +16,7 @@ def client():
 
 @requests_mock.Mocker(kw='mocker')
 def test_get_fields_for_dataset_that_does_not_exist(client, mocker):
-    mocker.get('http://test.com/v1/dataset/foo', status_code=404,
+    mocker.get('{}/v1/dataset/foo'.format(os.getenv('CT_URL')), status_code=404,
                json={"errors": [{"status": 404, "detail": "Dataset with id 'foo' doesn't exist"}]})
 
     response = client.post('/api/v1/earthengine/fields/foo')
@@ -64,7 +65,7 @@ def test_get_fields_for_dataset_invalid_provider(client, mocker):
             }
         }}
 
-    mocker.get('http://test.com/v1/dataset/bar', json=dataset_json)
+    mocker.get('{}/v1/dataset/bar'.format(os.getenv('CT_URL')), json=dataset_json)
 
     response = client.post('/api/v1/earthengine/fields/bar')
     assert response.status_code == 422
@@ -112,7 +113,7 @@ def test_get_fields_for_dataset_invalid_connector_type(client, mocker):
             }
         }}
 
-    mocker.get('http://test.com/v1/dataset/bar', json=dataset_json)
+    mocker.get('{}/v1/dataset/bar'.format(os.getenv('CT_URL')), json=dataset_json)
 
     response = client.post('/api/v1/earthengine/fields/bar')
     assert response.status_code == 422
@@ -180,9 +181,9 @@ def test_get_fields_for_dataset_happy_case(client, mocker):
         }
     }
 
-    mocker.get('http://test.com/v1/dataset/bar', json=dataset_json)
+    mocker.get('{}/v1/dataset/bar'.format(os.getenv('CT_URL')), json=dataset_json)
 
-    mocker.get('http://test.com/v1/convert/sql2SQL?sql=SELECT%20*%20FROM%20%22srtm90_v4%22%20LIMIT%201',
+    mocker.get('{}/v1/convert/sql2SQL?sql=SELECT%20*%20FROM%20%22srtm90_v4%22%20LIMIT%201'.format(os.getenv('CT_URL')),
                json=query_json)
 
     response = client.post('/api/v1/earthengine/fields/bar')
