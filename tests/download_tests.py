@@ -3,6 +3,7 @@ import requests_mock
 
 import adapterearthengine
 
+
 @pytest.fixture
 def client():
     app = adapterearthengine.app
@@ -188,7 +189,7 @@ def test_download_dataset_happy_case(client, mocker):
                 'userId': '1',
                 'connectorUrl': 'https://raw.githubusercontent.com/test/file.csv',
                 'sources': [],
-                'tableName': 'srtm90_v4',
+                'tableName': 'CGIAR/SRTM90_V4',
                 'status': 'saved',
                 'published': False,
                 'overwrite': True,
@@ -212,17 +213,34 @@ def test_download_dataset_happy_case(client, mocker):
         "data": {
             "type": "result",
             "attributes": {
-                "query": "SELECT * FROM \"srtm90_v4\" LIMIT 5",
+                "query": "SELECT ST_HISTOGRAM(rast,elevation,10,true) FROM CGIAR/SRTM90_V4",
                 "jsonSql": {
                     "select": [
                         {
-                            "value": "*",
+                            "type": "function",
                             "alias": None,
-                            "type": "wildcard"
+                            "value": "ST_HISTOGRAM",
+                            "arguments": [
+                                {
+                                    "value": "rast",
+                                    "type": "literal"
+                                },
+                                {
+                                    "value": "elevation",
+                                    "type": "literal"
+                                },
+                                {
+                                    "value": 10,
+                                    "type": "number"
+                                },
+                                {
+                                    "value": "true",
+                                    "type": "literal"
+                                }
+                            ]
                         }
                     ],
-                    "from": "srtm90_v4",
-                    "limit": 5
+                    "from": "CGIAR/SRTM90_V4"
                 }
             }
         }
@@ -230,12 +248,12 @@ def test_download_dataset_happy_case(client, mocker):
 
     mocker.get('http://test.com/v1/dataset/bar', json=dataset_json)
 
-    mocker.get('http://test.com/v1/convert/sql2SQL?sql=select%20%2A%20from%20%20srtm90_v4%20limit%205',
-               json=download_json)
+    mocker.get(
+        'http://test.com/v1/convert/sql2SQL?sql=SELECT%20ST_HISTOGRAM%28rast%2C%20elevation%2C%2010%2C%20true%29%20FROM%20CGIAR%2FSRTM90_V4',
+        json=download_json)
 
-    response = client.post('/api/v1/earthengine/download/bar?sql=select%20%2A%20from%20%20srtm90_v4%20limit%205')
+    response = client.post(
+        '/api/v1/earthengine/download/bar?sql=SELECT%20ST_HISTOGRAM%28rast%2C%20elevation%2C%2010%2C%20true%29%20FROM%20CGIAR%2FSRTM90_V4')
 
-    # TODO: Once https://github.com/Vizzuality/sql2gee/issues/16 is solved, this should return a 200, but the result validation needs to be calculated
-    # assert response.status_code == 200
-    assert response.status_code == 500
-    assert response.data == b'{"errors":[{"detail":"Generic Error","status":500}]}\n'
+    assert response.status_code == 200
+    assert response.data == b'{"data":{"data":[{"st_histogram":{"elevation":[[-18,5759.392156862745],[105.4,3387.054901960783],[228.8,1715.8705882352942],[352.20000000000005,854.8705882352941],[475.6,431.3921568627451],[599,201.51372549019607],[722.4000000000001,112.63529411764705],[845.8000000000001,51.63529411764705],[969.2,23.75686274509804],[1092.6000000000001,1]]}}],"meta":{}}}\n'
