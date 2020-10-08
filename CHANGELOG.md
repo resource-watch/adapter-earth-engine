@@ -1,3 +1,7 @@
+# 08/10/2020
+
+- Remove dependency on Control Tower's filter functionality.
+
 # 1.2.0
 
 - Update sql2gee to 0.5.0
