@@ -1,3 +1,7 @@
+# 1.2.0
+
+- Update sql2gee to 0.5.0
+
 # 1.1.0
 
 - Update sql2gee to 0.4.1
