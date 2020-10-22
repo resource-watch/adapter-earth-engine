@@ -1,5 +1,6 @@
 import pytest
 import os
+import json
 import requests_mock
 
 import adapterearthengine
@@ -256,4 +257,9 @@ def test_query_dataset_happy_case(client, mocker):
     response = client.post('/api/v1/earthengine/query/bar?sql=SELECT%20ST_HISTOGRAM%28rast%2C%20elevation%2C%2010%2C%20true%29%20FROM%20CGIAR%2FSRTM90_V4')
 
     assert response.status_code == 200
-    assert response.data == b'{"data":[{"st_histogram":{"elevation":[[-18,5759.392156862745],[105.4,3387.054901960783],[228.8,1715.8705882352942],[352.20000000000005,854.8705882352941],[475.6,431.3921568627451],[599,201.51372549019607],[722.4000000000001,112.63529411764705],[845.8000000000001,51.63529411764705],[969.2,23.75686274509804],[1092.6000000000001,1]]}}],"meta":{}}\n'
+
+    json_response = json.loads(response.data)
+    assert "data" in json_response
+    assert "st_histogram" in json_response['data'][0]
+    assert "elevation" in json_response['data'][0]['st_histogram']
+    assert len(json_response['data'][0]['st_histogram']['elevation']) == 10
