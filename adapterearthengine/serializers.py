@@ -1,5 +1,4 @@
 """Serializers"""
-import logging
 
 
 def serialize_query(data, meta):
