@@ -20,7 +20,6 @@ def build_query(request, dataset):
     logging.info(f'[ROUTER build_query]: {str(request.args)}')
     # sql or fs
     if sql:
-        test = copy.deepcopy(request.args).to_dict() or copy.deepcopy(request_json).to_dict()
         result_query = f'?sql={sql}'
     else:
         fs = copy.deepcopy(request.args) or copy.deepcopy(request_json)
