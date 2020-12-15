@@ -5,7 +5,7 @@ node {
   // Variables
   def tokens = "${env.JOB_NAME}".tokenize('/')
   def appName = tokens[0]
-  def dockerUsername = "${DOCKER_USERNAME}"
+  def dockerUsername = "${DOCKER_WRI_USERNAME}"
   def imageTag = "${dockerUsername}/${appName}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
 
   currentBuild.result = "SUCCESS"
@@ -22,13 +22,13 @@ node {
 
     stage ('Run Tests') {
       sh('docker-compose -H :2375 -f docker-compose-test.yml build')
-      sh('docker-compose -H :2375 -f docker-compose-test.yml run -e EE_ACCOUNT=${EE_ACCOUNT} -e EE_PRIVATE_KEY=${EE_PRIVATE_KEY} --rm test')
+      sh('docker-compose -H :2375 -f docker-compose-test.yml run --rm test')
       sh('docker-compose -H :2375 -f docker-compose-test.yml stop')
     }
 
     stage('Push Docker') {
-      withCredentials([usernamePassword(credentialsId: 'Vizzuality Docker Hub', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-        sh("docker -H :2375 login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}")
+      withCredentials([usernamePassword(credentialsId: 'WRI Docker Hub', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+        sh("docker -H :2375 login -u ${DOCKER_HUB_USERNAME} -p '${DOCKER_HUB_PASSWORD}'")
         sh("docker -H :2375 push ${imageTag}")
         sh("docker -H :2375 push ${dockerUsername}/${appName}:latest")
         sh("docker -H :2375 rmi ${imageTag}")
