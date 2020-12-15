@@ -1,6 +1,6 @@
 # Google Earth Engine Adapter Microservice
 
-[![Build Status](https://travis-ci.org/resource-watch/adapter-earth-engine.svg?branch=dev)](https://travis-ci.org/resource-watch/adapter-earth-engine)
+[![Build Status](https://travis-ci.com/resource-watch/adapter-earth-engine.svg?branch=dev)](https://travis-ci.com/resource-watch/adapter-earth-engine)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/b221d818e0e99f94d0c8/test_coverage)](https://codeclimate.com/github/resource-watch/adapter-earth-engine/test_coverage)
 
 This repository implements the Google Earth Engine Adapter services that are available in the Resource Watch API.
