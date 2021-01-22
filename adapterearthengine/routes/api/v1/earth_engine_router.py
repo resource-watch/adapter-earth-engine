@@ -1,7 +1,7 @@
 import copy
 import logging
 
-from CTRegisterMicroserviceFlask import request_to_microservice
+from RWAPIMicroservicePython import request_to_microservice
 from flask import jsonify, request, Blueprint
 
 from adapterearthengine.errors import SqlFormatError, GEEQueryError
