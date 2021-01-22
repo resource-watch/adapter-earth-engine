@@ -1,4 +1,5 @@
 import json
+import os
 
 import pytest
 import requests_mock
@@ -76,23 +77,35 @@ def client():
 
 @requests_mock.Mocker(kw='mocker')
 def test_delete_dataset_as_microservice(client, mocker):
+    get_user_data_calls = mocker.get(os.getenv('CT_URL') + '/auth/user/me', status_code=200, json=USERS['MICROSERVICE'])
+
     response = client.delete(
-        '/api/v1/earthengine/rest-datasets/gee/:dataset?loggedUser={}'.format(json.dumps(USERS['MICROSERVICE'])))
+        '/api/v1/earthengine/rest-datasets/gee/:dataset', headers={'Authorization': 'Bearer abcd'})
     assert response.data == b''
     assert response.status_code == 204
+    assert get_user_data_calls.called
+    assert get_user_data_calls.call_count == 1
 
 
 @requests_mock.Mocker(kw='mocker')
 def test_delete_dataset_as_admin(client, mocker):
+    get_user_data_calls = mocker.get(os.getenv('CT_URL') + '/auth/user/me', status_code=200, json=USERS['ADMIN'])
+
     response = client.delete(
-        '/api/v1/earthengine/rest-datasets/gee/:dataset?loggedUser={}'.format(json.dumps(USERS['ADMIN'])))
+        '/api/v1/earthengine/rest-datasets/gee/:dataset', headers={'Authorization': 'Bearer abcd'})
     assert response.data == b''
     assert response.status_code == 204
+    assert get_user_data_calls.called
+    assert get_user_data_calls.call_count == 1
 
 
 @requests_mock.Mocker(kw='mocker')
 def test_delete_dataset_as_manager(client, mocker):
+    get_user_data_calls = mocker.get(os.getenv('CT_URL') + '/auth/user/me', status_code=200, json=USERS['MANAGER'])
+
     response = client.delete(
-        '/api/v1/earthengine/rest-datasets/gee/:dataset?loggedUser={}'.format(json.dumps(USERS['MANAGER'])))
+        '/api/v1/earthengine/rest-datasets/gee/:dataset', headers={'Authorization': 'Bearer abcd'})
     assert json.loads(response.data) == {'errors': [{'detail': 'Not authorized', 'status': 403}]}
     assert response.status_code == 403
+    assert get_user_data_calls.called
+    assert get_user_data_calls.call_count == 1

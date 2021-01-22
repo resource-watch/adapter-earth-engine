@@ -1,6 +1,6 @@
 import logging
 
-from CTRegisterMicroserviceFlask import request_to_microservice
+from RWAPIMicroservicePython import request_to_microservice
 
 from adapterearthengine.errors import SqlFormatError
 
