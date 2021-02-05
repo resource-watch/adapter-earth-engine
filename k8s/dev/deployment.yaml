@@ -69,7 +69,7 @@ spec:
                 secretKeyRef:
                   key: EE_ACCOUNT
                   name: mssecrets
-          image: vizzuality/gee
+          image: gfwdockerhub/gee
           imagePullPolicy: Always
           name: gee
           ports:
