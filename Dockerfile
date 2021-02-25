@@ -11,15 +11,15 @@ RUN apk update && apk upgrade && \
 RUN addgroup $USER && adduser -s /bin/bash -D -G $USER $USER
 
 RUN pip install --upgrade pip
-RUN pip install virtualenv gunicorn gevent --use-feature=2020-resolver
+RUN pip install virtualenv gunicorn gevent
 
 RUN mkdir -p /opt/$NAME
 RUN cd /opt/$NAME && virtualenv venv && source venv/bin/activate
 COPY tox.ini /opt/$NAME/tox.ini
 COPY requirements.txt /opt/$NAME/requirements.txt
 COPY requirements_dev.txt /opt/$NAME/requirements_dev.txt
-RUN cd /opt/$NAME && pip install -r requirements.txt --use-feature=2020-resolver
-RUN cd /opt/$NAME && pip install -r requirements_dev.txt --use-feature=2020-resolver
+RUN cd /opt/$NAME && pip install -r requirements.txt
+RUN cd /opt/$NAME && pip install -r requirements_dev.txt
 
 COPY entrypoint.sh /opt/$NAME/entrypoint.sh
 COPY main.py /opt/$NAME/main.py

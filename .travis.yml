@@ -3,8 +3,8 @@ python:
   - "3.6"
 install:
     - pip install --upgrade pip
-    - pip install -r requirements.txt --use-feature=2020-resolver
-    - pip install -r requirements_dev.txt --use-feature=2020-resolver
+    - pip install -r requirements.txt
+    - pip install -r requirements_dev.txt
 env:
   global:
     - CC_TEST_REPORTER_ID=972a29fc370fae49a37220d1c23dafd0e71184217547376c7c495cf9670aa607
