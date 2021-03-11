@@ -4,3 +4,4 @@ RWAPIMicroservicePython==0.3.0
 pycrypto==2.6.1
 requests==2.23.0
 sql2gee==0.5.1
+google-api-python-client==1.12.8
