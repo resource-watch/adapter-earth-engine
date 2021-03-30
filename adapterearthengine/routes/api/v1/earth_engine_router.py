@@ -42,7 +42,7 @@ def delete(dataset_id):
     return b'', 204
 
 
-@earth_engine_endpoints.route('/query/<dataset_id>', methods=['POST'])
+@earth_engine_endpoints.route('/query/<dataset_id>', methods=['GET', 'POST'])
 @get_dataset_from_id
 def query(dataset_id, dataset):
     """Query GEE Dataset Endpoint"""
@@ -86,7 +86,7 @@ def query(dataset_id, dataset):
     return jsonify(serialize_query(response, meta)), 200
 
 
-@earth_engine_endpoints.route('/fields/<dataset_id>', methods=['POST'])
+@earth_engine_endpoints.route('/fields/<dataset_id>', methods=['GET'])
 @get_dataset_from_id
 def fields(dataset_id, dataset):
     """Get GEE Dataset Fields Endpoint"""
@@ -110,7 +110,7 @@ def fields(dataset_id, dataset):
     return jsonify(data=serialize_fields(response, table_name)), 200
 
 
-@earth_engine_endpoints.route('/download/<dataset_id>', methods=['POST'])
+@earth_engine_endpoints.route('/download/<dataset_id>', methods=['GET', 'POST'])
 @get_dataset_from_id
 def download(dataset_id, dataset):
     """Download GEE Dataset Endpoint"""
