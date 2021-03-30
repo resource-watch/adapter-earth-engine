@@ -6,7 +6,7 @@
       "method": "GET",
       "binary": true,
       "redirect": {
-        "method": "POST",
+        "method": "GET",
         "path": "/api/v1/earthengine/query/:dataset"
       }
     },
@@ -24,7 +24,7 @@
       "method": "GET",
       "binary": true,
       "redirect": {
-        "method": "POST",
+        "method": "GET",
         "path": "/api/v1/earthengine/download/:dataset"
       }
     },
@@ -41,7 +41,7 @@
       "path": "/v1/fields/gee/:dataset",
       "method": "GET",
       "redirect": {
-        "method": "POST",
+        "method": "GET",
         "path": "/api/v1/earthengine/fields/:dataset"
       }
     },
