@@ -1,6 +1,6 @@
 Flask==1.1.1
 earthengine-api==0.1.236
-RWAPIMicroservicePython==0.3.0
+RWAPIMicroservicePython==0.4.0
 pycrypto==2.6.1
 requests==2.23.0
 sql2gee==0.5.1
