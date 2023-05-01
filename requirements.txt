@@ -1,4 +1,4 @@
-Flask==1.1.1
+Flask==2.3.2
 earthengine-api==0.1.236
 RWAPIMicroservicePython==0.4.0
 pycrypto==2.6.1
