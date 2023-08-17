@@ -1,5 +1,6 @@
 import logging
 import os
+import httplib2
 
 import RWAPIMicroservicePython
 import ee
@@ -22,7 +23,7 @@ EE_PRIVATE_KEY_FILE = 'privatekey.json'
 
 gee_credentials = ee.ServiceAccountCredentials(EE_ACCOUNT, EE_PRIVATE_KEY_FILE)
 
-ee.Initialize(gee_credentials)
+ee.Initialize(gee_credentials, http_transport=httplib2.Http())
 ee.data.setDeadline(60000)
 
 # Flask
