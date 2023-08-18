@@ -1,4 +1,5 @@
 import logging
+from flask import request
 
 from RWAPIMicroservicePython import request_to_microservice
 
@@ -21,11 +22,11 @@ def convert(query, query_type='sql'):
     logging.info(f'[QUERY SERVICE - convert]: {result}')
 
     try:
-        config = {
-            'uri': '/convert/' + result,
-            'method': 'GET'
-        }
-        response = request_to_microservice(config)
+        response = request_to_microservice(
+            uri=f"/convert/{result}",
+            method="GET",
+            api_key=request.headers.get("x-api-key"),
+        )
         return response
     except Exception as error:
         raise error
@@ -37,11 +38,11 @@ def convert(query, query_type='sql'):
 
 def get_geojson(geostore):
     try:
-        config = {
-            'uri': f'/geostore/{geostore}',
-            'method': 'GET'
-        }
-        response = request_to_microservice(config)
+        response = request_to_microservice(
+            uri=f"/geostore/{geostore}",
+            method="GET",
+            api_key=request.headers.get("x-api-key"),
+        )
         return response.get('data').get('attributes').get('geojson')
     except Exception as error:
         raise error

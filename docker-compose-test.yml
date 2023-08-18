@@ -7,10 +7,15 @@ services:
     container_name: adapter-earth-engine-test
     environment:
       DEBUG: "True"
-      CT_REGISTER_MODE: "False"
-      CT_URL: http://mymachine:9000
+      GATEWAY_URL: http://mymachine:9000
       API_VERSION: v1
       LOCAL_URL: http://mymachine:5700
-      CT_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
+      MICROSERVICE_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
       PORT: 5700
+      EE_PRIVATE_KEY: ${EE_PRIVATE_KEY}
+      EE_ACCOUNT: ${EE_ACCOUNT}
+      AWS_REGION: "us-east-1"
+      REQUIRE_API_KEY: "True"
+      AWS_SECRET_ACCESS_KEY: 34VLzL2E885g03QOp60KyL3pZn6kFlkmdkPeHfoE
+      AWS_ACCESS_KEY_ID: AKIA4IKXSDIU3C3IVVQE
     command: test

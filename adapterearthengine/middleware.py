@@ -30,7 +30,9 @@ def get_dataset_from_id(func):
         logging.debug("Getting dataset from id")
 
         try:
-            dataset_object = DatasetService.get(kwargs['dataset_id'])
+            dataset_object = DatasetService.get(
+                kwargs["dataset_id"], request.headers.get("x-api-key")
+            )
         except DatasetNotFound:
             return error(status=404, detail="Dataset with id {} doesn't exist".format(kwargs['dataset_id']))
 
