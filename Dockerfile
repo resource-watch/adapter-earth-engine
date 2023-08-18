@@ -1,32 +1,31 @@
-FROM python:3.6-alpine
+FROM python:3.11-bullseye
 MAINTAINER Vizzuality info@vizzuality.com
 
 ENV NAME adapterearthengine
 ENV USER adapterearthengine
 
-RUN apk update && apk upgrade && \
-   apk add --no-cache --update bash git openssl-dev build-base alpine-sdk \
-   libffi-dev gcc python3-dev musl-dev
+RUN apt-get -y update && apt-get -y upgrade && \
+   apt-get install -y bash git openssl \
+   libffi-dev gcc musl-dev libgeos-dev python3-pip python3-dev
 
-RUN addgroup $USER && adduser -s /bin/bash -D -G $USER $USER
+RUN addgroup $USER && adduser --shell /bin/bash --disabled-login --ingroup $USER $USER
 
 RUN pip install --upgrade pip
 RUN pip install virtualenv gunicorn gevent
 
 RUN mkdir -p /opt/$NAME
-RUN cd /opt/$NAME && virtualenv venv && source venv/bin/activate
-COPY tox.ini /opt/$NAME/tox.ini
+WORKDIR /opt/$NAME
+
 COPY requirements.txt /opt/$NAME/requirements.txt
 COPY requirements_dev.txt /opt/$NAME/requirements_dev.txt
-RUN cd /opt/$NAME && pip install -r requirements.txt
-RUN cd /opt/$NAME && pip install -r requirements_dev.txt
+RUN pip install -r requirements.txt
+RUN pip install -r requirements_dev.txt
 
 COPY entrypoint.sh /opt/$NAME/entrypoint.sh
 COPY main.py /opt/$NAME/main.py
 COPY gunicorn.py /opt/$NAME/gunicorn.py
 
 # Copy the application folder inside the container
-WORKDIR /opt/$NAME
 
 COPY ./adapterearthengine /opt/$NAME/adapterearthengine
 COPY ./microservice /opt/$NAME/microservice
