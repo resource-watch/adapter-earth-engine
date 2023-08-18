@@ -4,13 +4,12 @@ from adapterearthengine.errors import DatasetNotFound
 
 
 class DatasetService(object):
-
     @staticmethod
     def execute(uri, api_key):
         response = request_to_microservice(uri=uri, api_key=api_key, method="GET")
-        if not response or response.get('errors'):
-            raise DatasetNotFound(message='Dataset not found')
-        dataset = response.get('data', None).get('attributes', None)
+        if not response or response.get("errors"):
+            raise DatasetNotFound(message="Dataset not found")
+        dataset = response.get("data", None).get("attributes", None)
         return dataset
 
     @staticmethod

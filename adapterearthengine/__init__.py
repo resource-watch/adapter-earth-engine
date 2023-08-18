@@ -12,13 +12,13 @@ from adapterearthengine.routes.api.v1 import earth_engine_endpoints
 
 # Logging
 logging.basicConfig(
-    level=SETTINGS.get('logging', {}).get('level'),
-    format='[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s',
-    datefmt='%Y%m%d-%H:%M%p',
+    level=SETTINGS.get("logging", {}).get("level"),
+    format="[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s",
+    datefmt="%Y%m%d-%H:%M%p",
 )
 
-EE_ACCOUNT = os.environ['EE_ACCOUNT']
-EE_PRIVATE_KEY_FILE = 'privatekey.json'
+EE_ACCOUNT = os.environ["EE_ACCOUNT"]
+EE_PRIVATE_KEY_FILE = "privatekey.json"
 
 gee_credentials = ee.ServiceAccountCredentials(EE_ACCOUNT, EE_PRIVATE_KEY_FILE)
 
@@ -32,7 +32,8 @@ app = Flask(__name__)
 app.config.from_object(SETTINGS)
 
 # Routing
-app.register_blueprint(earth_engine_endpoints, url_prefix='/api/v1/earthengine')
+app.register_blueprint(earth_engine_endpoints, url_prefix="/api/v1/earthengine")
+
 
 RWAPIMicroservicePython.register(
     app=app,
@@ -49,29 +50,29 @@ RWAPIMicroservicePython.register(
 
 @app.errorhandler(403)
 def forbidden(e):
-    logging.error('Forbidden')
-    return error(status=403, detail='Forbidden')
+    logging.error("Forbidden")
+    return error(status=403, detail="Forbidden")
 
 
 @app.errorhandler(404)
 def page_not_found(e):
-    logging.error('Not Found')
-    return error(status=404, detail='Not Found')
+    logging.error("Not Found")
+    return error(status=404, detail="Not Found")
 
 
 @app.errorhandler(405)
 def method_not_allowed(e):
-    logging.error('Method Not Allowed')
-    return error(status=405, detail='Method Not Allowed')
+    logging.error("Method Not Allowed")
+    return error(status=405, detail="Method Not Allowed")
 
 
 @app.errorhandler(410)
 def gone(e):
-    logging.error('Gone')
-    return error(status=410, detail='Gone')
+    logging.error("Gone")
+    return error(status=410, detail="Gone")
 
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    logging.error('Internal Server Error')
-    return error(status=500, detail='Internal Server Error')
+    logging.error("Internal Server Error")
+    return error(status=500, detail="Internal Server Error")
