@@ -28,7 +28,6 @@ COPY gunicorn.py /opt/$NAME/gunicorn.py
 # Copy the application folder inside the container
 
 COPY ./adapterearthengine /opt/$NAME/adapterearthengine
-COPY ./microservice /opt/$NAME/microservice
 COPY tests /opt/$NAME/tests
 RUN chown -R $USER:$USER /opt/$NAME
 
