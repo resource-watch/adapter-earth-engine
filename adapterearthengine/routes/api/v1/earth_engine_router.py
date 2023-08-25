@@ -208,7 +208,7 @@ def register_dataset():
         status = 2
 
     config = {
-        "uri": "/dataset/" + request.get_json().get("connector").get("id"),
+        "uri": f"/v1/dataset/{request.get_json().get('connector').get('id')}",
         "method": "PATCH",
         "body": {"status": status},
     }

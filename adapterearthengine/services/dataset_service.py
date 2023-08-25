@@ -14,5 +14,5 @@ class DatasetService(object):
 
     @staticmethod
     def get(dataset, api_key):
-        uri = f"/dataset/{dataset}"
+        uri = f"/v1/dataset/{dataset}"
         return DatasetService.execute(uri, api_key)

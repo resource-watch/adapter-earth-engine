@@ -23,7 +23,7 @@ def convert(query, query_type="sql"):
 
     try:
         response = request_to_microservice(
-            uri=f"/convert/{result}",
+            uri=f"/v1/convert/{result}",
             method="GET",
             api_key=request.headers.get("x-api-key"),
         )
@@ -39,7 +39,7 @@ def convert(query, query_type="sql"):
 def get_geojson(geostore):
     try:
         response = request_to_microservice(
-            uri=f"/geostore/{geostore}",
+            uri=f"/v2/geostore/{geostore}",
             method="GET",
             api_key=request.headers.get("x-api-key"),
         )
