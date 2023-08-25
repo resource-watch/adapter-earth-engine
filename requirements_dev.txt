@@ -3,3 +3,4 @@ pytest-cov==4.1.0
 pytest-mock==3.11.1
 codecov==2.1.13
 requests_mock==1.11.0
+moto==4.2.0

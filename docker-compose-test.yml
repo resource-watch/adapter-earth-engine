@@ -16,5 +16,5 @@ services:
       EE_ACCOUNT: ${EE_ACCOUNT}
       AWS_REGION: "us-east-1"
       REQUIRE_API_KEY: "True"
-      AWS_CLOUD_WATCH_LOGGING_ENABLED: "False"
+      AWS_CLOUD_WATCH_LOGGING_ENABLED: "True"
     command: test

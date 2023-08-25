@@ -1,12 +1,16 @@
 import pytest
+from moto import mock_logs
 
-import adapterearthengine
 
-
-@pytest.fixture
+@pytest.fixture(scope="package")
 def client():
-    app = adapterearthengine.app
+    mocked_logs = mock_logs()
+    mocked_logs.start()
+
+    from adapterearthengine import app
+
     app.config["TESTING"] = True
     client = app.test_client()
 
     yield client
+    mocked_logs.stop()

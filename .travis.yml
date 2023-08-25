@@ -13,7 +13,8 @@ env:
     - LOCAL_URL=http://127.0.0.1:5037
     - GATEWAY_URL=http://127.0.0.1:9000
     - MICROSERVICE_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
-    - AWS_CLOUD_WATCH_LOGGING_ENABLED=False
+    - AWS_REGION=us-east-1
+    - REQUIRE_API_KEY=True
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
