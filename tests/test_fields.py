@@ -78,7 +78,7 @@ def test_get_fields_for_dataset_happy_case(client, mocker):
     mock_get_dataset(mocker, dataset_json)
     mock_request_validation(mocker, microservice_token=os.getenv("MICROSERVICE_TOKEN"))
     mocker.get(
-        f"{os.getenv('GATEWAY_URL')}/convert/sql2SQL?sql=SELECT%20*%20FROM%20%22srtm90_v4%22%20LIMIT%201",
+        f"{os.getenv('GATEWAY_URL')}/v1/convert/sql2SQL?sql=SELECT%20*%20FROM%20%22srtm90_v4%22%20LIMIT%201",
         json=query_json,
     )
 
