@@ -75,7 +75,6 @@ def test_query_dataset_no_query(client, mocker):
     )
 
 
-# Failing because of an issue with sql2gee
 @requests_mock.mock(kw="mocker")
 def test_query_dataset_happy_case(client, mocker):
     mock_get_dataset(mocker, dataset_json)
