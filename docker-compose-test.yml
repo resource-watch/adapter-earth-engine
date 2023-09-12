@@ -8,7 +8,6 @@ services:
     environment:
       DEBUG: "True"
       GATEWAY_URL: http://mymachine:9000
-      API_VERSION: v1
       LOCAL_URL: http://mymachine:5700
       MICROSERVICE_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
       PORT: 5700
