@@ -7,15 +7,16 @@ services:
     container_name: adapter-earth-engine-develop
     environment:
       PORT: 5700
-      CT_REGISTER_MODE: auto
-      CT_URL: http://mymachine:9000
+      GATEWAY_URL: http://mymachine:9000
       LOCAL_URL: http://mymachine:5700
-      CT_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
+      MICROSERVICE_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
       ENVIRONMENT: dev
       DEBUG: "True"
       EE_PRIVATE_KEY: ${EE_PRIVATE_KEY}
       EE_ACCOUNT: ${EE_ACCOUNT}
-      API_VERSION: v1
+      AWS_REGION: "us-east-1"
+      REQUIRE_API_KEY: "True"
+      AWS_CLOUD_WATCH_LOGGING_ENABLED: "False"
     command: develop
     volumes:
       - ./adapterearthengine:/opt/adapter-earth-engine/adapterearthengine
