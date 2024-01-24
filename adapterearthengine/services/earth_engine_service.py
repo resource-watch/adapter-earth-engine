@@ -1,5 +1,10 @@
 import logging
 
+import inspect
+
+if not hasattr(inspect, "getargspec"):
+    inspect.getargspec = inspect.getfullargspec
+
 from sql2gee import SQL2GEE
 import collections
 
